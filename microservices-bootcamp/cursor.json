@@ -1,0 +1,6 @@
+{
+    "name": "microservices-bootcamp",
+    "description": "Java + Spring Boot microservices scaffold with modular prompt packs for Cursor IDE",
+    "tags": ["spring-boot", "microservices", "cursor", "prompt-engineering"],
+    "version": "1.0.0"
+  }
