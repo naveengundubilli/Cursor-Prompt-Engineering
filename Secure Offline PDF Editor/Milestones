@@ -1,0 +1,64 @@
+Milestones → Cursor Prompts Mapping
+Milestone 1: Core Viewer & Security (MVP foundation)
+
+Cursor Prompts to run:
+
+Project Bootstrap – “Set up Gradle 9 Kotlin DSL project with Java 21, JavaFX, PDFBox, BouncyCastle, Tess4J…”
+
+Security & Offline Posture – “Implement offline guard, AES-256 encryption/decryption, permission model, JUnit tests…”
+
+PDF Core – “Add PDF rendering with PDFBox → JavaFX, password protection, redaction, PKCS#12 signing (basic)…”
+
+JavaFX UI (MVP) – “Implement 3-pane UI shell (Files, Document, Properties), toolbar with Open/Save/Zoom, Undo/Redo…”
+
+✅ Result: Secure offline PDF viewer with password protection + basic UI.
+
+Milestone 2: Essential Editing & Signing
+
+Cursor Prompts to run:
+
+Extend Editing Tools → “Enable text editing (insert/modify/delete), image insertion/resizing, annotation tools…”
+
+Extend PDF Core → “Add digital signing: freehand, image-based, X.509 certificate-based…”
+
+Extend JavaFX UI → “Add Print support, page management (add/delete/reorder/rotate), workspace format .sopdfe…”
+
+✅ Result: Fully usable editor with text/image/signatures and page management.
+
+Milestone 3: Advanced Usability & Forms
+
+Cursor Prompts to run:
+
+Extend Editing Tools → “Add bookmarks navigation, shape drawing, multi-object selection…”
+
+Extend PDF Core → “Enable form filling (AcroForms), export to PDF/A (archival)… ”
+
+Improve Undo/Redo → “Implement command-pattern history stack…”
+
+✅ Result: Enhanced usability with forms, shapes, archival export.
+
+Milestone 4: Power-User & Internationalization
+
+Cursor Prompts to run:
+
+OCR (Tess4J) – “Integrate OCR, add searchable text layer injection, multilingual tessdata…”
+
+Extend Form Handling – “Enable form field creation (text, checkboxes, radios), validation rules…”
+
+Extend Layout & Design – “Add grid + snap alignment, layer management, Table of Contents…”
+
+Extend Language Support – “Implement multilingual UI + font embedding for international PDFs…”
+
+✅ Result: Power-user features (OCR, advanced forms, TOC, i18n).
+
+Milestone 5: Packaging & Maintenance
+
+Cursor Prompts to run:
+
+Packaging & Reproducibility – “Add Gradle jlink runtime + jpackage installers, ensure reproducible builds…”
+
+QA & Security Checks – “Add unit + integration tests, SpotBugs/ErrorProne, license reports, GitHub Actions CI…”
+
+Version Bump (Maintenance) – “Keep dependencies updated via libs.versions.toml…”
+
+✅ Result: Production-ready, reproducible, installer-based secure PDF editor.

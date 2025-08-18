@@ -1,0 +1,139 @@
+{
+  "milestones": [
+    {
+      "id": "milestone-1",
+      "title": "Core Viewer & Security (MVP foundation)",
+      "prompts": [
+        {
+          "id": "project-bootstrap",
+          "title": "Project Bootstrap",
+          "text": "Create a new Gradle 9 (Kotlin DSL) project using Java 21.\n\nAdd dependencies:\n- JavaFX (latest stable compatible with Java 21)\n- Apache PDFBox (latest stable)\n- BouncyCastle (latest stable)\n- Tess4J (latest stable, optional OCR support)\n\nGenerate:\n- `settings.gradle.kts`\n- `build.gradle.kts` with plugins: application, java, org.owasp.dependencycheck\n- `libs.versions.toml` for centralized dependency versions\n- Main class `com.securepdfeditor.App` with a simple JavaFX window (title: \"Secure Offline PDF Editor\", icon `/icons/app_icon.png`).\n\nEnsure Gradle builds successfully. Offline mode only."
+        },
+        {
+          "id": "security-offline",
+          "title": "Security & Offline Posture",
+          "text": "Add offline security features:\n1. Disable network access (sandbox mode).\n2. Secure temp file handling (`Files.createTempFile`) with cleanup.\n3. AES-256 PDF encryption/decryption using BouncyCastle.\n4. PDF permission model (restrict printing/editing if set).\n5. JUnit 5 tests for encryption/decryption.\n\nUpdate `build.gradle.kts` with BouncyCastle and JUnit 5.\nPackage: `com.securepdfeditor.security`"
+        },
+        {
+          "id": "pdf-core",
+          "title": "PDF Core",
+          "text": "Add PDF handling with PDFBox:\n1. Open/load PDFs (`PDDocument`) including password-protected.\n2. Render PDF pages as JavaFX `Image` using PDFBox + JavaFX bridge.\n3. Redaction support (blackout rectangles).\n4. Minimal redaction overlay persistence.\n5. File chooser filter for password-protected PDFs.\n6. Digital signing stub (PKCS#12) for Milestone 2.\n\nPackage: `com.securepdfeditor.pdf`"
+        },
+        {
+          "id": "ui-shell",
+          "title": "JavaFX UI (MVP Shell)",
+          "text": "Implement minimal JavaFX UI:\n- BorderPane layout.\n- Centered scrollable PDF viewer.\n- Menu items (Adobe-style) with icons & shortcuts for Open, Save, Zoom, Undo, Redo.\n- Bottom toolbar: zoom slider + page number display.\n- File → Open/Save with `PDFService`.\n- Support pagination (Next/Previous Page).\n- Undo/Redo stack for zoom/pagination.\n- Error handling dialogs for failed file operations.\n\nPackage: `com.securepdfeditor.ui`"
+        }
+      ]
+    },
+    {
+      "id": "milestone-2",
+      "title": "Essential Editing & Signing",
+      "prompts": [
+        {
+          "id": "editing-tools",
+          "title": "Editing Tools",
+          "text": "Enhance PDF editing:\n- Text Editing: add/delete/modify using `PDPageContentStream`.\n- Image Insertion: JPG/PNG with resize & reposition.\n- Shape Drawing: rectangles, circles, lines.\n- Annotation Tools: highlight, underline, strike-through, sticky notes.\n- Multi-object Selection via drag.\n- Menu items for each function with icons.\n- Error handling: alert on invalid operations.\n\nPackage: `com.securepdfeditor.editing`"
+        },
+        {
+          "id": "signing",
+          "title": "Digital Signing",
+          "text": "Secure digital signing:\n- Draw signature on JavaFX Canvas.\n- Upload signature image.\n- Certificate-based signing (BouncyCastle, PKCS#12).\n- Signature panel with tabs: Draw, Upload, Certificate.\n- Validate signatures when opening PDFs.\n- Error handling: invalid certificate or signature.\n\nPackage: `com.securepdfeditor.signing`"
+        },
+        {
+          "id": "ui-extensions",
+          "title": "UI Extensions for Editing & Signing",
+          "text": "Update JavaFX UI:\n- Adobe-style menu only (remove toolbar buttons).\n- Menu icons and shortcuts assigned.\n- Side panel for layers/objects.\n- Context menus for properties.\n- Signature panel modal.\n- Centered PDF display maintained.\n- Multi-page zoom centering maintained.\n- Bottom toolbar: zoom slider + page number.\n- Error handling for invalid edits.\n\nPackage: `com.securepdfeditor.ui`"
+        },
+        {
+          "id": "layout-design",
+          "title": "Layout & Page Management",
+          "text": "Layout controls:\n- Grid overlay + snap.\n- Layer reordering (bring forward/backward).\n- Page Management: add, delete, reorder, rotate.\n- Centered PDF page display using StackPane.\n- Undo/Redo support for these actions.\n- Error handling for invalid page operations.\n\nPackage: `com.securepdfeditor.layout`"
+        }
+      ]
+    },
+    {
+      "id": "milestone-3",
+      "title": "Advanced Usability & Forms",
+      "prompts": [
+        {
+          "id": "forms",
+          "title": "Form Handling",
+          "text": "Interactive PDF forms:\n- Menu items: Text Field (/icons/textfield.png), Checkbox (/icons/checkbox.png), Radio Button (/icons/radiobutton.png)\n- Add fields with PDFBox AcroForm API.\n- Fill forms and save responses.\n- Validation rules: required/email.\n- Export form data XML/JSON.\n- Centered PDF & multi-page zoom maintained.\n- Error handling for invalid form actions.\n\nPackage: `com.securepdfeditor.forms`"
+        },
+        {
+          "id": "search-navigation",
+          "title": "Search & Navigation",
+          "text": "Navigation:\n- Menu items: Find (/icons/search.png), Bookmarks (/icons/bookmark.png), TOC (/icons/toc.png)\n- Text search highlighting.\n- Bookmark creation/navigation.\n- Auto/manual TOC.\n- Error handling for invalid searches/bookmarks.\n\nPackage: `com.securepdfeditor.navigation`"
+        },
+        {
+          "id": "pdf-assembly",
+          "title": "PDF Assembly (Merge & Split)",
+          "text": "Multi-file handling:\n- Menu items: Merge (/icons/merge.png), Split (/icons/split.png), Insert Pages (/icons/insert.png)\n- Merge PDFs at beginning, end, or after page number.\n- Split pages into new PDF.\n- Insert pages from other PDFs.\n- Respect encrypted PDFs.\n- Error handling: invalid page ranges or corrupted files.\n\nPackage: `com.securepdfeditor.assembly`"
+        }
+      ]
+    },
+    {
+      "id": "milestone-4",
+      "title": "Power-User & Internationalization",
+      "prompts": [
+        {
+          "id": "undo-redo",
+          "title": "Undo/Redo",
+          "text": "Undo/Redo menu:\n- Undo (/icons/undo.png, Ctrl+Z), Redo (/icons/redo.png, Ctrl+Y)\n- Full action history.\n- Persist stack until doc close.\n- Error handling: disable undo/redo if empty.\n\nPackage: `com.securepdfeditor.history`"
+        },
+        {
+          "id": "ocr",
+          "title": "OCR Integration",
+          "text": "OCR via Tess4J:\n- Menu item: Run OCR (/icons/ocr.png)\n- Detect text in scanned pages.\n- Overlay selectable text.\n- Maintain overlay alignment during zoom/scroll.\n- Allow copy from OCR overlay.\n- Error handling: notify if OCR fails.\n\nPackage: `com.securepdfeditor.ocr`"
+        },
+        {
+          "id": "i18n",
+          "title": "Internationalization & Fonts",
+          "text": "Multilingual support:\n- Menu item: Language (/icons/language.png)\n- JavaFX UI translations.\n- Font rendering CJK/RTL.\n- Switch UI language at runtime.\n- Error handling: fallback if translation missing.\n\nPackage: `com.securepdfeditor.i18n`"
+        }
+      ]
+    },
+    {
+      "id": "milestone-5",
+      "title": "Packaging & Maintenance",
+      "prompts": [
+        {
+          "id": "packaging",
+          "title": "Cross-Platform Packaging",
+          "text": "Offline packaging:\n- Menu item: Build (/icons/build.png)\n- jlink runtime image.\n- jpackage installers (MSI/DMG/DEB).\n- Bundle JavaFX runtime.\n- Error handling for packaging failures.\n- Output: `/dist`\n"
+        },
+        {
+          "id": "updates",
+          "title": "Maintenance & Dependency Management",
+          "text": "Build-time quality:\n- Menu item: Check Updates (/icons/update.png)\n- SpotBugs static analysis.\n- OWASP Dependency Check.\n- Gradle automated testing & packaging.\n- Version catalog (`libs.versions.toml`).\n- Error handling: alert on failed checks.\n- CI pipeline (GitHub Actions/GitLab CI) for build+test+package."
+        }
+      ]
+    }
+  ],
+  "ui_mapping": {
+    "file": {"open": {"icon": "/icons/open.png", "shortcut": "Ctrl+O"}, "save": {"icon": "/icons/save.png", "shortcut": "Ctrl+S"}, "saveAs": {"icon": "/icons/save_as.png", "shortcut": "Ctrl+Shift+S"}, "print": {"icon": "/icons/print.png", "shortcut": "Ctrl+P"}, "importPages": {"icon": "/icons/insert.png"}, "merge": {"icon": "/icons/merge.png"}, "split": {"icon": "/icons/split.png"}},
+    "edit": {"undo": {"icon": "/icons/undo.png", "shortcut": "Ctrl+Z"}, "redo": {"icon": "/icons/redo.png", "shortcut": "Ctrl+Y"}, "cut": {"icon": "/icons/cut.png", "shortcut": "Ctrl+X"}, "copy": {"icon": "/icons/copy.png", "shortcut": "Ctrl+C"}, "paste": {"icon": "/icons/paste.png", "shortcut": "Ctrl+V"}},
+    "view": {"zoomIn": {"icon": "/icons/zoom_in.png", "shortcut": "Ctrl+Plus"}, "zoomOut": {"icon": "/icons/zoom_out.png", "shortcut": "Ctrl+Minus"}, "pagePrev": {"icon": "/icons/page_prev.png"}, "pageNext": {"icon": "/icons/page_next.png"}},
+    "forms": {"textField": {"icon": "/icons/textfield.png"}, "checkbox": {"icon": "/icons/checkbox.png"}, "radioButton": {"icon": "/icons/radiobutton.png"}},
+    "annotations": {"highlight": {"icon": "/icons/highlight.png"}, "underline": {"icon": "/icons/underline.png"}, "strikeThrough": {"icon": "/icons/strikethrough.png"}, "stickyNote": {"icon": "/icons/sticky_note.png"}, "shapes": {"icon": "/icons/shape_rect.png"}},
+    "sign": {"draw": {"icon": "/icons/sign_draw.png"}, "upload": {"icon": "/icons/sign_upload.png"}, "certificate": {"icon": "/icons/sign_cert.png"}},
+    "ocr": {"run": {"icon": "/icons/ocr.png"}},
+    "language": {"select": {"icon": "/icons/language.png"}},
+    "build": {"package": {"icon": "/icons/build.png"}},
+    "update": {"check": {"icon": "/icons/update.png"}}
+  },
+  "cursor_hints": {
+    "strategy": "Minimize credit usage by generating code incrementally per milestone.",
+    "steps": [
+      "1. Implement Milestone-1: project setup, offline security, core PDF viewer, centered display.",
+      "2. Commit and test each feature locally before generating next milestone.",
+      "3. For Milestone-2, generate editing and signing features with menu-only UI, icons & shortcuts.",
+      "4. For Milestone-3, implement forms, search/navigation, PDF assembly with menu integration and error handling.",
+      "5. For Milestone-4, implement undo/redo, OCR, and i18n step-by-step, verifying centered PDF behavior.",
+      "6. For Milestone-5, implement packaging and maintenance tasks after all functionality is validated.",
+      "7. Use the `ui_mapping` section to ensure Cursor applies icons and shortcuts correctly.",
+      "8. Generate code per milestone in small chunks to minimize credits and allow review/testing."
+    ]
+  }
+}
