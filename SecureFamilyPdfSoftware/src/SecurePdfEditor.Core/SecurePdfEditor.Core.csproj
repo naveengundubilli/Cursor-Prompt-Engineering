@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyTitle>SecurePdfEditor.Core</AssemblyTitle>
+    <AssemblyDescription>Core business logic for Secure PDF Editor</AssemblyDescription>
+    <AssemblyCompany>SecurePdfEditor</AssemblyCompany>
+    <AssemblyProduct>SecurePdfEditor.Core</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2024</AssemblyCopyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Input validation and security -->
+    <PackageReference Include="FluentValidation" Version="11.8.1" />
+    
+    <!-- Cryptography for secure operations -->
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
+    
+    <!-- PDF processing libraries -->
+    <PackageReference Include="QuestPDF" Version="2023.12.6" />
+    
+    <!-- PDF processing libraries - TODO: Add compatible PDF library in future milestone -->
+    <!-- <PackageReference Include="PdfiumViewer" Version="2.13.0" /> -->
+    <!-- <PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="8.0.350" /> -->
+  </ItemGroup>
+
+  <!-- Create folder structure for organized code -->
+  <ItemGroup>
+    <Folder Include="Pdf\" />
+    <Folder Include="Security\" />
+    <Folder Include="Utils\" />
+  </ItemGroup>
+
+</Project>

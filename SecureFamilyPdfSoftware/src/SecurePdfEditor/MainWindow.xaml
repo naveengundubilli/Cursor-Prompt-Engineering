@@ -1,0 +1,195 @@
+<Window x:Class="SecurePdfEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Secure PDF Editor"
+        Height="800" Width="1200"
+        WindowState="Maximized">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Application Header -->
+        <materialDesign:ColorZone Grid.Row="0" 
+                                  Mode="PrimaryMid" 
+                                  Padding="16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="FilePdfBox" 
+                                            Width="32" 
+                                            Height="32" 
+                                            VerticalAlignment="Center"/>
+                    <TextBlock Text="Secure PDF Editor" 
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+                
+                <TextBlock Grid.Column="2" 
+                           Text="Offline &amp; Secure"
+                           Style="{StaticResource MaterialDesignBody2TextBlock}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource MaterialDesignPaper}"/>
+            </Grid>
+        </materialDesign:ColorZone>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Navigation Panel -->
+            <materialDesign:Card Grid.Column="0" 
+                                 Margin="8" 
+                                 Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Tools" 
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Margin="0,0,0,16"/>
+                    
+                    <Button Content="Open PDF"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,4"
+                            Command="{Binding OpenPdfCommand}"/>
+                    
+                    <Button Content="Save PDF"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,4"
+                            Command="{Binding SavePdfCommand}"/>
+                    
+                    <Separator Margin="0,16"/>
+                    
+                    <TextBlock Text="Security" 
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Margin="0,0,0,16"/>
+                    
+                    <Button Content="Encrypt PDF"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,4"
+                            Command="{Binding EncryptPdfCommand}"/>
+                    
+                    <Button Content="Remove Password"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,4"
+                            Command="{Binding RemovePasswordCommand}"/>
+                    
+                    <Separator Margin="0,16"/>
+                    
+                    <TextBlock Text="Edit" 
+                               Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                               Margin="0,0,0,16"/>
+                    
+                    <Button Content="Add Text"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,4"
+                            Command="{Binding AddTextCommand}"/>
+                    
+                    <Button Content="Add Image"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Margin="0,4"
+                            Command="{Binding AddImageCommand}"/>
+                </StackPanel>
+            </materialDesign:Card>
+            
+            <!-- PDF Viewer Area -->
+            <materialDesign:Card Grid.Column="1" 
+                                 Margin="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- PDF Viewer Toolbar -->
+                    <materialDesign:ColorZone Grid.Row="0" 
+                                              Mode="PrimaryLight" 
+                                              Padding="8">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource MaterialDesignIconButton}"
+                                    Command="{Binding PreviousPageCommand}">
+                                <materialDesign:PackIcon Kind="ChevronLeft"/>
+                            </Button>
+                            
+                            <TextBlock Text="{Binding CurrentPageText}"
+                                       Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0"/>
+                            
+                            <Button Style="{StaticResource MaterialDesignIconButton}"
+                                    Command="{Binding NextPageCommand}">
+                                <materialDesign:PackIcon Kind="ChevronRight"/>
+                            </Button>
+                            
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
+                                       Margin="8,0"/>
+                            
+                            <TextBlock Text="{Binding ZoomText}"
+                                       Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0"/>
+                            
+                            <Button Style="{StaticResource MaterialDesignIconButton}"
+                                    Command="{Binding ZoomInCommand}">
+                                <materialDesign:PackIcon Kind="MagnifyPlus"/>
+                            </Button>
+                            
+                            <Button Style="{StaticResource MaterialDesignIconButton}"
+                                    Command="{Binding ZoomOutCommand}">
+                                <materialDesign:PackIcon Kind="MagnifyMinus"/>
+                            </Button>
+                        </StackPanel>
+                    </materialDesign:ColorZone>
+                    
+                    <!-- PDF Display Area -->
+                    <Border Grid.Row="1" 
+                            Background="{DynamicResource MaterialDesignPaper}"
+                            BorderBrush="{DynamicResource MaterialDesignDivider}"
+                            BorderThickness="1"
+                            Margin="8">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                                      VerticalScrollBarVisibility="Auto">
+                            <!-- PDF viewer content will be bound here -->
+                            <ContentControl Content="{Binding PdfViewerContent}"/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+        
+        <!-- Status Bar -->
+        <materialDesign:ColorZone Grid.Row="2" 
+                                  Mode="PrimaryLight" 
+                                  Padding="8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" 
+                           Text="{Binding StatusMessage}"
+                           Style="{StaticResource MaterialDesignBody2TextBlock}"
+                           VerticalAlignment="Center"/>
+                
+                <TextBlock Grid.Column="1" 
+                           Text="{Binding SecurityStatus}"
+                           Style="{StaticResource MaterialDesignBody2TextBlock}"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </materialDesign:ColorZone>
+    </Grid>
+</Window>

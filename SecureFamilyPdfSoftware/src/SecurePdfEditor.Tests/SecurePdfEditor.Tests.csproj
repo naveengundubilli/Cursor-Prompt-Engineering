@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <AssemblyTitle>SecurePdfEditor.Tests</AssemblyTitle>
+    <AssemblyDescription>Unit tests for Secure PDF Editor</AssemblyDescription>
+    <AssemblyCompany>SecurePdfEditor</AssemblyCompany>
+    <AssemblyProduct>SecurePdfEditor.Tests</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2024</AssemblyCopyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    
+    <!-- Test-specific settings -->
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Test framework -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.6.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    
+    <!-- Mocking framework -->
+    <PackageReference Include="Moq" Version="4.20.69" />
+    
+    <!-- Test utilities -->
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the projects we want to test -->
+    <ProjectReference Include="..\SecurePdfEditor.Core\SecurePdfEditor.Core.csproj" />
+    <ProjectReference Include="..\SecurePdfEditor\SecurePdfEditor.csproj" />
+  </ItemGroup>
+
+</Project>

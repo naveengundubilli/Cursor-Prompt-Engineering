@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <StartupObject>SecurePdfEditor.App</StartupObject>
+    <AssemblyTitle>Secure PDF Editor</AssemblyTitle>
+    <AssemblyDescription>Offline PDF editor with security-first design</AssemblyDescription>
+    <AssemblyCompany>SecurePdfEditor</AssemblyCompany>
+    <AssemblyProduct>SecurePdfEditor</AssemblyProduct>
+    <AssemblyCopyright>Copyright © 2024</AssemblyCopyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SecurePdfEditor.Core\SecurePdfEditor.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- MVVM Framework for clean architecture -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    
+    <!-- Material Design for modern UI -->
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
+    
+    <!-- PDF processing libraries (open source only) - TODO: Add in future milestone -->
+    <!-- <PackageReference Include="PdfiumViewer" Version="2.13.0" /> -->
+    <!-- <PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="8.0.350" /> -->
+    
+    <!-- Input validation and security -->
+    <PackageReference Include="FluentValidation" Version="11.8.1" />
+  </ItemGroup>
+
+
+
+</Project>
