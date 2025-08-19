@@ -86,45 +86,115 @@ java -jar build/libs/secure-offline-pdf-editor-1.0.0.jar
 
 ## 📦 Packaging & Distribution
 
-### Create Application Package
+### Create Secure MSI Installer
 
-The application can be packaged for distribution using the custom packaging task:
+The application is packaged as a secure Microsoft Installer (MSI) with comprehensive security features:
 
+#### **Quick Build (Recommended)**
 ```cmd
-.\gradlew.bat packageApp
+# Use the automated build script
+.\build-msi.bat
 ```
 
-This creates a platform-specific package in the `dist/` directory:
-- `secure-pdf-editor-1.0.0-windows.zip`
+#### **Manual Build**
+```cmd
+# Build using Gradle directly
+.\gradlew.bat createMsi
+```
 
-### Package Contents
+This creates a secure MSI installer in the `build/msi/` directory:
+- `SecurePDFEditor-1.0.0.msi`
 
-The package includes:
-- Application JAR file
-- Gradle wrapper for easy building
-- Build configuration files
-- Resources and dependencies
-- Documentation and license files
+#### **Prerequisites for Building**
+- **Java 21**: Required for compilation and security features
+- **WiX Toolset v3.11.2**: Required for MSI creation
+  - Download from: https://github.com/wixtoolset/wix3/releases
+  - Or set `WIX` environment variable to installation directory
+- **Administrator rights**: Required for some security features
+
+### Security Features
+
+The MSI installer includes the following security features to prevent malware and trojans:
+
+#### 🔒 **Anti-Malware Protection**
+- **Real-time scanning**: Continuous monitoring for malicious files
+- **Heuristic analysis**: Detects unknown threats using behavioral patterns
+- **Signature scanning**: Identifies known malware signatures
+- **Entropy analysis**: Detects packed/obfuscated malicious code
+- **File quarantine**: Automatically isolates suspicious files
+
+#### 🛡️ **File Integrity Verification**
+- **SHA-256 hashing**: Verifies file integrity using cryptographic hashes
+- **Continuous monitoring**: Monitors files for unauthorized modifications
+- **Tamper detection**: Alerts when files are modified without authorization
+- **Rollback protection**: Prevents installation of compromised files
+
+#### 🔐 **Installation Security**
+- **Elevated privileges**: Requires administrator rights for installation
+- **Secure directories**: Installs to protected system directories
+- **Permission controls**: Sets appropriate file and folder permissions
+- **Registry security**: Creates secure registry entries with proper access controls
+
+#### 🌐 **Network Security**
+- **Firewall integration**: Creates Windows Firewall rules
+- **Windows Defender**: Configures exclusions and works with existing security
+- **Offline-first**: Designed for secure offline operation
+- **Connection validation**: Verifies network connections when online mode is enabled
+
+#### 📋 **System Requirements**
+- **Windows 10/11**: Requires modern Windows with security features
+- **Java 21**: Requires latest Java runtime for security updates
+- **Administrator rights**: Required for secure installation
+- **UAC compliance**: Works with User Account Control
 
 ### Install on Windows
 
-1. **Extract the package**:
+For detailed installation instructions, see the **[Installation Guide](Installation.md)**.
+
+#### **Quick Installation Steps**
+
+1. **Prerequisites**:
+   - Install Java 21 from [Adoptium](https://adoptium.net/temurin/releases/?version=21) or [Oracle](https://www.oracle.com/java/technologies/downloads/#java21)
+   - Enable Windows Defender and Windows Firewall
+   - Ensure UAC is enabled
+
+2. **Download and Install**:
+   - Download `SecurePDFEditor-1.0.0.msi` from the distribution
+   - Right-click the MSI file and select "Run as administrator"
+   - Follow the installation wizard
+
+3. **Verify Installation**:
    ```cmd
-   # Extract the downloaded zip file
-   Expand-Archive secure-pdf-editor-1.0.0-windows.zip -DestinationPath C:\SecurePDFEditor
+   # Check installation directory
+   dir "C:\Program Files\SecurePDFEditor"
+   
+   # Verify security features
+   netsh advfirewall firewall show rule name="Secure PDF Editor"
+   reg query "HKLM\SOFTWARE\SecurePDFEditor\Security"
    ```
 
-2. **Run the application**:
-   ```cmd
-   cd C:\SecurePDFEditor
-   .\gradlew.bat run
-   ```
+4. **Launch Application**:
+   - Use Start Menu shortcut: "Secure PDF Editor"
+   - Or desktop shortcut (if selected during installation)
+   - Or run from: `C:\Program Files\SecurePDFEditor\SecurePDFEditor.jar`
 
-3. **Create desktop shortcut** (optional):
-   - Right-click on desktop → New → Shortcut
-   - Browse to the extracted folder
-   - Select `gradlew.bat` and add `run` as argument
-   - Name it "Secure PDF Editor"
+#### **Security Features Activated**
+
+The installer automatically:
+- **Registers files** for integrity monitoring
+- **Creates security logs** in `C:\Program Files\SecurePDFEditor\logs\`
+- **Sets up quarantine** directory for suspicious files
+- **Configures monitoring** services for continuous protection
+- **Creates Windows Firewall rules** and **Windows Defender exclusions**
+
+### Package Contents
+
+The secure MSI installer includes:
+- **Signed application JAR** with integrity verification
+- **Security configuration** files with anti-malware settings
+- **Windows integration** components (Firewall, Defender, Registry)
+- **Documentation** and security guidelines
+- **Logging and monitoring** infrastructure
 
 ## 🔧 Configuration
 
@@ -304,7 +374,54 @@ For OCR functionality:
 
 ## 🔍 Troubleshooting
 
+For comprehensive troubleshooting information, see the **[Installation Guide](Installation.md#troubleshooting)**.
+
+### Quick Security Verification
+
+#### Verify Installation Integrity
+```cmd
+# Check if files are properly installed
+dir "C:\Program Files\SecurePDFEditor"
+
+# Verify file permissions
+icacls "C:\Program Files\SecurePDFEditor"
+
+# Check security logs
+type "C:\Program Files\SecurePDFEditor\logs\security.log"
+```
+
+#### Verify Security Features
+```cmd
+# Check Windows Firewall rules
+netsh advfirewall firewall show rule name="Secure PDF Editor"
+
+# Check Windows Defender exclusions
+reg query "HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths"
+
+# Verify registry security entries
+reg query "HKLM\SOFTWARE\SecurePDFEditor\Security"
+```
+
+#### Security Status Check
+The application includes built-in security status monitoring:
+- **File integrity**: Monitors for unauthorized file modifications
+- **Malware detection**: Scans for suspicious files and behavior
+- **Network security**: Blocks unauthorized network access
+- **Registry monitoring**: Tracks security-related registry changes
+
 ### Common Issues
+
+#### Installation Security Issues
+```cmd
+# Verify administrator privileges
+whoami /groups | findstr "Administrators"
+
+# Check UAC settings
+reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA
+
+# Verify Windows Defender status
+Get-MpComputerStatus | Select-Object AntivirusEnabled, RealTimeProtectionEnabled
+```
 
 #### Java Version Issues
 ```cmd
