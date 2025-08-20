@@ -35,53 +35,61 @@ A secure, offline-first PDF editor built with Java 21, JavaFX, Apache PDFBox, Bo
 
 ## 🛠️ Installation & Setup
 
-### 1. Install Java 21
+### Quick Installation
 
-Download and install Java 21 from:
-- **OpenJDK**: https://adoptium.net/temurin/releases/?version=21
-- **Oracle JDK**: https://www.oracle.com/java/technologies/downloads/#java21
+#### **Prerequisites**
+- **Java 21**: Download from [Adoptium](https://adoptium.net/temurin/releases/?version=21)
+- **Windows 10/11** (64-bit)
+- **Administrator rights** (required for secure installation)
 
-Verify installation:
+#### **Install from MSI (Recommended)**
 ```cmd
-java -version
-javac -version
+# Download and verify checksums
+certutil -hashfile SecurePDFEditor-1.0.0.msi SHA256
+# Should match: 2998caecb781ddc233c4f21083a8da2551fa49059a7ea510ab1e57efe3615d72
+
+# Install securely
+Right-click SecurePDFEditor-1.0.0.msi → "Run as administrator"
 ```
 
-### 2. Clone the Repository
-
+#### **Install from JAR**
 ```cmd
+# Run directly
+java -jar build/libs/secure-offline-pdf-editor-1.0.0.jar
+
+# Or install manually
+mkdir "C:\Program Files\SecurePDFEditor"
+copy build\libs\secure-offline-pdf-editor-1.0.0.jar "C:\Program Files\SecurePDFEditor\SecurePDFEditor.jar"
+```
+
+### Development Setup
+
+#### **Build from Source**
+```cmd
+# Clone repository
 git clone https://github.com/your-username/secure-offline-pdf-editor.git
 cd secure-offline-pdf-editor
-```
 
-### 3. Build the Application
-
-#### Quick Build (Development)
-```cmd
-.\gradlew.bat build
-```
-
-#### Run Tests
-```cmd
-.\gradlew.bat test
-```
-
-#### Run Quality Checks
-```cmd
-.\gradlew.bat quality
-```
-
-### 4. Run the Application
-
-#### Development Mode
-```cmd
-.\gradlew.bat run
-```
-
-#### From JAR File
-```cmd
+# Build application
 .\gradlew.bat jar
-java -jar build/libs/secure-offline-pdf-editor-1.0.0.jar
+
+# Run tests
+.\gradlew.bat test
+
+# Create secure MSI installer
+.\create-secure-msi.bat
+```
+
+#### **Security Verification**
+```cmd
+# Verify installation integrity
+reg query "HKLM\SOFTWARE\SecurePDFEditor\Security"
+
+# Check file permissions
+icacls "C:\Program Files\SecurePDFEditor"
+
+# Verify Windows Firewall rules
+netsh advfirewall firewall show rule name="Secure PDF Editor"
 ```
 
 ## 📦 Packaging & Distribution
@@ -505,63 +513,3 @@ The application follows a modular architecture:
 2. Create feature branch: `git checkout -b feature-name`
 3. Make changes and test thoroughly
 4. Run quality checks: `.\gradlew.bat quality`
-5. Commit changes: `git commit -m "Add feature"`
-6. Push to branch: `git push origin feature-name`
-7. Create Pull Request
-
-### Code Style
-- Follow Java coding conventions
-- Use meaningful variable and method names
-- Add Javadoc comments for public APIs
-- Write unit tests for new features
-
-### Testing Guidelines
-- Write tests for all new functionality
-- Maintain test coverage above 80%
-- Include positive and negative test cases
-- Test edge cases and error conditions
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-### Getting Help
-- **Issues**: Create GitHub issue with detailed description
-- **Documentation**: Check this README and inline code comments
-- **Community**: Join discussions in GitHub Discussions
-
-### Reporting Bugs
-When reporting bugs, please include:
-- Operating system and version
-- Java version
-- Steps to reproduce
-- Expected vs actual behavior
-- Error messages and logs
-- Sample PDF file (if applicable)
-
-### Feature Requests
-- Use GitHub Issues with "enhancement" label
-- Describe the feature and use case
-- Consider implementation complexity
-- Check existing issues for duplicates
-
-## 🔄 Version History
-
-### v1.0.0 (Current)
-- Initial release with all core features
-- Complete PDF editing and signing capabilities
-- OCR integration and form handling
-- Cross-platform packaging support
-- Comprehensive security features
-
-## 📞 Contact
-
-- **Project**: https://github.com/your-username/secure-offline-pdf-editor
-- **Issues**: https://github.com/your-username/secure-offline-pdf-editor/issues
-- **Discussions**: https://github.com/your-username/secure-offline-pdf-editor/discussions
-
----
-
-**Note**: This application is designed for offline use with security as a primary concern. Always verify the integrity of PDF files and digital signatures before processing sensitive documents.

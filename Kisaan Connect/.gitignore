@@ -1,0 +1,13 @@
+.gradle/
+build/
+out/
+node_modules/
+.env
+.DS_Store
+*.log
+__pycache__/
+.mypy_cache/
+.venv/
+*.iml
+.idea/
+

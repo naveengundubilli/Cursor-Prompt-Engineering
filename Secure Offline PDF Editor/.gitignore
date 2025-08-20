@@ -268,3 +268,77 @@ cache/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Security and Build Artifacts
+# MSI Installer files
+build/msi/*.msi
+build/msi/*.wixobj
+build/msi/*.wixpdb
+build/msi/*.cab
+build/msi/checksums.txt
+
+# Security verification files
+SECURITY-VERIFICATION.md
+security-*.md
+security-*.txt
+
+# Code signing certificates and keys
+*.pfx
+*.p12
+*.key
+*.crt
+*.cer
+*.pem
+*.der
+*.p7b
+*.p7c
+
+# Digital signatures
+*.sig
+*.asc
+*.gpg
+
+# Checksum files
+*.md5
+*.sha1
+*.sha256
+checksums.txt
+integrity.txt
+
+# Heap dump files (memory issues)
+java_pid*.hprof
+*.hprof
+
+# WiX Toolset temporary files
+*.wixobj
+*.wixpdb
+*.wixproj
+*.wxs.bak
+
+# Installation logs
+install-*.log
+setup-*.log
+msi-*.log
+
+# Security scan reports
+security-scan-*.xml
+security-scan-*.html
+vulnerability-*.xml
+vulnerability-*.html
+
+# Test artifacts
+test-results/
+test-output/
+coverage/
+*.coverage
+*.lcov
+
+# Performance profiling
+*.jfr
+*.hprof
+*.dump
+
+# Temporary build files
+*.tmp
+*.temp
+*.cache

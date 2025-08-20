@@ -1,10 +1,11 @@
+import java.util.UUID
+
 plugins {
 	application
 	java
 	id("org.openjfx.javafxplugin") version "0.1.0"
 	id("org.owasp.dependencycheck") version "9.0.9"
 	id("com.github.spotbugs") version "6.0.20"
-	id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 version = "1.0.0"
@@ -128,12 +129,12 @@ tasks.register("quality") {
 }
 
 // WiX Toolset configuration for MSI installer
-val wixToolsetVersion = "3.11.2"
+val wixToolsetVersion = "3.14"
 val wixToolsetDir = System.getenv("WIX") ?: "C:\\Program Files (x86)\\WiX Toolset v$wixToolsetVersion"
 
 // Custom MSI packaging task with security features
 tasks.register("createMsi") {
-	dependsOn("shadowJar")
+	dependsOn("jar")
 	description = "Create secure MSI installer with security features"
 	group = "distribution"
 	
@@ -146,36 +147,43 @@ tasks.register("createMsi") {
 		val wixFile = msiDir.resolve("SecurePDFEditor.wxs")
 		wixFile.writeText(wixSource)
 		
-		// Create security configuration
-		val securityConfig = createSecurityConfig()
-		val securityFile = msiDir.resolve("security.wxi")
-		securityFile.writeText(securityConfig)
+		// Check if WiX Toolset is available
+		val candleExe = file("$wixToolsetDir\\bin\\candle.exe")
+		val lightExe = file("$wixToolsetDir\\bin\\light.exe")
 		
-		// Compile WiX source to MSI
-		exec {
-			commandLine("$wixToolsetDir\\bin\\candle.exe", 
-				"-ext", "WixUtilExtension",
-				"-ext", "WixSecurityExtension", 
-				"-dVersion=${project.version}",
-				"-dProductName=Secure PDF Editor",
-				"-dManufacturer=SecurePDFEditor",
-				"-dProductCode={${generateProductCode()}}",
-				"-dUpgradeCode={${generateUpgradeCode()}}",
-				"-out", "${msiDir}\\SecurePDFEditor.wixobj",
-				wixFile.absolutePath
-			)
+		if (!candleExe.exists() || !lightExe.exists()) {
+			println("WiX Toolset not found at: $wixToolsetDir")
+			println("Please install WiX Toolset v$wixToolsetVersion from: https://github.com/wixtoolset/wix3/releases")
+			println("Or set WIX environment variable to the installation path")
+			return@doLast
+		}
+		
+		// Compile WiX source to MSI using ProcessBuilder
+		val candleProcess = ProcessBuilder(
+			candleExe.absolutePath,
+			"-out", "${msiDir}\\SecurePDFEditor.wixobj",
+			wixFile.absolutePath
+		).start()
+		
+		val candleExitCode = candleProcess.waitFor()
+		if (candleExitCode != 0) {
+			println("WiX compilation failed with exit code: $candleExitCode")
+			return@doLast
 		}
 		
 		// Link MSI with security features
-		exec {
-			commandLine("$wixToolsetDir\\bin\\light.exe",
-				"-ext", "WixUtilExtension",
-				"-ext", "WixSecurityExtension",
-				"-ext", "WixUIExtension",
-				"-cultures:en-us",
-				"-out", "${msiDir}\\SecurePDFEditor-${project.version}.msi",
-				"${msiDir}\\SecurePDFEditor.wixobj"
-			)
+		val lightProcess = ProcessBuilder(
+			lightExe.absolutePath,
+			"-ext", "WixUIExtension",
+			"-cultures:en-us",
+			"-out", "${msiDir}\\SecurePDFEditor-${project.version}.msi",
+			"${msiDir}\\SecurePDFEditor.wixobj"
+		).start()
+		
+		val lightExitCode = lightProcess.waitFor()
+		if (lightExitCode != 0) {
+			println("WiX linking failed with exit code: $lightExitCode")
+			return@doLast
 		}
 		
 		println("Secure MSI installer created: ${msiDir}\\SecurePDFEditor-${project.version}.msi")
@@ -184,7 +192,7 @@ tasks.register("createMsi") {
 
 // Generate unique product code for MSI
 fun generateProductCode(): String {
-	return java.util.UUID.randomUUID().toString().uppercase()
+	return UUID.randomUUID().toString().uppercase()
 }
 
 // Generate upgrade code for MSI
@@ -195,23 +203,17 @@ fun generateUpgradeCode(): String {
 // Create WiX source file with security features
 fun createWixSource(): String {
 	return """<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
-     xmlns:sec="http://schemas.microsoft.com/wix/SecurityExtension">
-    
-    <?include security.wxi ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     
     <Product Id="*" 
              Name="Secure PDF Editor" 
              Language="1033" 
-             Version="$(var.Version)" 
+             Version="${project.version}" 
              Manufacturer="SecurePDFEditor" 
-             UpgradeCode="$(var.UpgradeCode)"
-             InstallScope="perMachine">
+             UpgradeCode="12345678-1234-1234-1234-123456789012">
         
         <Package InstallerVersion="200" 
                  Compressed="yes" 
-                 InstallScope="perMachine"
                  Description="Secure Offline PDF Editor Installer"
                  Comments="Secure PDF Editor with anti-malware protection"
                  Manufacturer="SecurePDFEditor"
@@ -228,25 +230,6 @@ fun createWixSource(): String {
             <![CDATA[Installed OR (VersionNT >= 603)]]>
         </Condition>
         
-        <!-- Security: Require .NET Framework -->
-        <PropertyRef Id="NETFRAMEWORK45" />
-        <Condition Message="This application requires .NET Framework 4.5 or later.">
-            <![CDATA[Installed OR NETFRAMEWORK45]]>
-        </Condition>
-        
-        <!-- Security: Require Java 21 -->
-        <Property Id="JAVA21PATH" Value="[SOFTWARE\JavaSoft\Java Runtime Environment\21.0]" />
-        <Condition Message="This application requires Java 21 or later.">
-            <![CDATA[Installed OR JAVA21PATH]]>
-        </Condition>
-        
-        <!-- Security: File integrity verification -->
-        <Property Id="SECURE_INSTALL" Value="1" />
-        <Property Id="VERIFY_FILES" Value="1" />
-        
-        <!-- Security: Anti-tampering protection -->
-        <Property Id="ANTI_TAMPER" Value="1" />
-        
         <!-- Security: Secure installation directory -->
         <Property Id="INSTALLDIR" Value="[ProgramFiles64Folder]SecurePDFEditor" />
         
@@ -257,60 +240,25 @@ fun createWixSource(): String {
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFiles64Folder">
                 <Directory Id="INSTALLDIR" Name="SecurePDFEditor">
-                    <!-- Security: Set secure permissions on installation directory -->
-                    <Component Id="SecureDirectoryPermissions" Guid="{12345678-1234-1234-1234-123456789012}">
-                        <CreateFolder>
-                            <Permission User="Administrators" GenericAll="yes" />
-                            <Permission User="Users" GenericRead="yes" GenericExecute="yes" />
-                            <Permission User="Everyone" GenericRead="yes" GenericExecute="yes" />
-                        </CreateFolder>
-                    </Component>
-                    
                     <!-- Main application files -->
                     <Component Id="MainExecutable" Guid="{87654321-4321-4321-4321-210987654321}">
                         <File Id="SecurePDFEditorJar" 
                               Name="SecurePDFEditor.jar" 
-                              Source="build/libs/secure-offline-pdf-editor-${project.version}-all.jar"
-                              KeyPath="yes">
-                            <!-- Security: Set secure file permissions -->
-                            <Permission User="Administrators" GenericAll="yes" />
-                            <Permission User="Users" GenericRead="yes" GenericExecute="yes" />
-                            <Permission User="Everyone" GenericRead="yes" GenericExecute="yes" />
-                        </File>
-                        
-                        <!-- Security: File integrity check -->
-                        <util:FileHash Id="JarFileHash" File="[INSTALLDIR]SecurePDFEditor.jar" />
-                    </Component>
-                    
-                    <!-- Security: Configuration files with restricted permissions -->
-                    <Component Id="ConfigFiles" Guid="{11111111-1111-1111-1111-111111111111}">
-                        <File Id="ConfigFile" 
-                              Name="config.properties" 
-                              Source="src/main/resources/config.properties"
-                              KeyPath="yes">
-                            <!-- Security: Restrict config file permissions -->
-                            <Permission User="Administrators" GenericAll="yes" />
-                            <Permission User="Users" GenericRead="yes" />
-                        </File>
+                              Source="build/libs/secure-offline-pdf-editor-${project.version}.jar"
+                              KeyPath="yes" />
                     </Component>
                     
                     <!-- Security: Log directory with proper permissions -->
                     <Directory Id="LogDir" Name="logs">
                         <Component Id="LogDirectory" Guid="{22222222-2222-2222-2222-222222222222}">
-                            <CreateFolder>
-                                <Permission User="Administrators" GenericAll="yes" />
-                                <Permission User="Users" GenericWrite="yes" />
-                            </CreateFolder>
+                            <CreateFolder />
                         </Component>
                     </Directory>
                     
                     <!-- Security: Temp directory with restricted permissions -->
                     <Directory Id="TempDir" Name="temp">
                         <Component Id="TempDirectory" Guid="{33333333-3333-3333-3333-333333333333}">
-                            <CreateFolder>
-                                <Permission User="Administrators" GenericAll="yes" />
-                                <Permission User="Users" GenericWrite="yes" />
-                            </CreateFolder>
+                            <CreateFolder />
                         </Component>
                     </Directory>
                 </Directory>
@@ -321,35 +269,14 @@ fun createWixSource(): String {
         <Component Id="SecurityRegistry" Guid="{44444444-4444-4444-4444-444444444444}" Directory="INSTALLDIR">
             <RegistryKey Root="HKLM" Key="SOFTWARE\SecurePDFEditor\Security">
                 <RegistryValue Type="string" Name="InstallPath" Value="[INSTALLDIR]" />
-                <RegistryValue Type="string" Name="Version" Value="$(var.Version)" />
+                <RegistryValue Type="string" Name="Version" Value="${project.version}" />
                 <RegistryValue Type="integer" Name="SecureMode" Value="1" />
                 <RegistryValue Type="integer" Name="AntiTamper" Value="1" />
                 <RegistryValue Type="integer" Name="FileIntegrity" Value="1" />
-                <RegistryValue Type="string" Name="InstallDate" Value="[Date]" />
-                <RegistryValue Type="string" Name="InstallUser" Value="[LogonUser]" />
             </RegistryKey>
         </Component>
         
-        <!-- Security: Windows Firewall rules -->
-        <Component Id="FirewallRules" Guid="{55555555-5555-5555-5555-555555555555}" Directory="INSTALLDIR">
-            <util:FirewallException Id="SecurePDFEditorFirewall" 
-                                   Name="Secure PDF Editor" 
-                                   Scope="any" 
-                                   Profile="all" 
-                                   IgnoreFailure="yes" />
-        </Component>
-        
-        <!-- Security: Windows Defender exclusions -->
-        <Component Id="DefenderExclusions" Guid="{66666666-6666-6666-6666-666666666666}" Directory="INSTALLDIR">
-            <util:RegistryValue Id="DefenderExclusion" 
-                               Root="HKLM" 
-                               Key="SOFTWARE\Microsoft\Windows Defender\Exclusions\Paths" 
-                               Name="[INSTALLDIR]" 
-                               Value="0" 
-                               Type="integer" />
-        </Component>
-        
-        <!-- Security: Application shortcuts with integrity verification -->
+        <!-- Security: Application shortcuts -->
         <Directory Id="ProgramMenuFolder">
             <Directory Id="ProgramMenuDir" Name="Secure PDF Editor">
                 <Component Id="ProgramMenuShortcut" Guid="{77777777-7777-7777-7777-777777777777}">
@@ -357,90 +284,35 @@ fun createWixSource(): String {
                               Name="Secure PDF Editor" 
                               Description="Secure Offline PDF Editor"
                               Target="[INSTALLDIR]SecurePDFEditor.jar"
-                              WorkingDirectory="INSTALLDIR"
-                              Icon="SecurePDFEditor.ico"
-                              IconIndex="0">
-                        <!-- Security: Verify shortcut integrity -->
-                        <util:FileHash Id="ShortcutHash" File="[ProgramMenuDir]Secure PDF Editor.lnk" />
-                    </Shortcut>
+                              WorkingDirectory="INSTALLDIR" />
                     <RemoveFolder Id="ProgramMenuDir" On="uninstall" />
                     <RegistryValue Root="HKCU" Key="Software\SecurePDFEditor" Name="installed" Type="integer" Value="1" KeyPath="yes" />
                 </Component>
             </Directory>
         </Directory>
         
-        <!-- Security: Desktop shortcut with verification -->
+        <!-- Security: Desktop shortcut -->
         <Directory Id="DesktopFolder">
             <Component Id="DesktopShortcut" Guid="{88888888-8888-8888-8888-888888888888}">
                 <Shortcut Id="DesktopShortcut" 
                           Name="Secure PDF Editor" 
                           Description="Secure Offline PDF Editor"
                           Target="[INSTALLDIR]SecurePDFEditor.jar"
-                          WorkingDirectory="INSTALLDIR"
-                          Icon="SecurePDFEditor.ico"
-                          IconIndex="0" />
+                          WorkingDirectory="INSTALLDIR" />
                 <RemoveFolder Id="DesktopFolder" On="uninstall" />
                 <RegistryValue Root="HKCU" Key="Software\SecurePDFEditor" Name="installed" Type="integer" Value="1" KeyPath="yes" />
             </Component>
         </Directory>
-        
-        <!-- Security: Custom actions for integrity verification -->
-        <CustomAction Id="VerifyInstallation" 
-                      Script="vbscript">
-            <![CDATA[
-                ' Verify installation integrity
-                Set fso = CreateObject("Scripting.FileSystemObject")
-                Set shell = CreateObject("WScript.Shell")
-                
-                installPath = Session.Property("INSTALLDIR")
-                jarPath = installPath & "SecurePDFEditor.jar"
-                
-                If Not fso.FileExists(jarPath) Then
-                    MsgBox "Installation verification failed: Main executable not found", vbCritical
-                    Session.Property("INSTALLATION_FAILED") = "1"
-                End If
-                
-                ' Verify file permissions
-                Set file = fso.GetFile(jarPath)
-                If file.Attributes And 1 Then ' Read-only
-                    MsgBox "Security warning: File permissions may be compromised", vbExclamation
-                End If
-            ]]>
-        </CustomAction>
-        
-        <!-- Security: Rollback action for failed installations -->
-        <CustomAction Id="RollbackInstallation" 
-                      Script="vbscript">
-            <![CDATA[
-                ' Clean up on installation failure
-                installPath = Session.Property("INSTALLDIR")
-                Set fso = CreateObject("Scripting.FileSystemObject")
-                
-                If fso.FolderExists(installPath) Then
-                    fso.DeleteFolder installPath, True
-                End If
-            ]]>
-        </CustomAction>
-        
-        <!-- Security: Installation sequence with verification -->
-        <InstallExecuteSequence>
-            <Custom Action="VerifyInstallation" After="InstallFiles">NOT Installed</Custom>
-            <Custom Action="RollbackInstallation" After="VerifyInstallation">INSTALLATION_FAILED</Custom>
-        </InstallExecuteSequence>
         
         <!-- Security: Feature with required components -->
         <Feature Id="Complete" 
                  Title="Secure PDF Editor" 
                  Level="1"
                  Description="Complete installation of Secure PDF Editor with all security features">
-            <ComponentRef Id="SecureDirectoryPermissions" />
             <ComponentRef Id="MainExecutable" />
-            <ComponentRef Id="ConfigFiles" />
             <ComponentRef Id="LogDirectory" />
             <ComponentRef Id="TempDirectory" />
             <ComponentRef Id="SecurityRegistry" />
-            <ComponentRef Id="FirewallRules" />
-            <ComponentRef Id="DefenderExclusions" />
             <ComponentRef Id="ProgramMenuShortcut" />
             <ComponentRef Id="DesktopShortcut" />
         </Feature>
@@ -450,7 +322,6 @@ fun createWixSource(): String {
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
         
         <!-- Security: Installation properties -->
-        <Property Id="ARPPRODUCTICON" Value="SecurePDFEditor.ico" />
         <Property Id="ARPHELPLINK" Value="https://github.com/securepdfeditor/help" />
         <Property Id="ARPURLINFOABOUT" Value="https://github.com/securepdfeditor" />
         <Property Id="ARPCONTACT" Value="security@securepdfeditor.com" />

@@ -1,0 +1,414 @@
+{
+  "project": "KisanConnect",
+  "version": "1.2",
+  "strategy": "Build in vertical slices; each milestone delivers a runnable demo and smoke tests.",
+  "notes": "Run prompts in order within each milestone. Allow Cursor to write files, then fix builds/tests when prompted.",
+  "milestones": [
+    {
+      "id": "M1-foundation",
+      "title": "Foundation: Monorepo, shared libs, local stack",
+      "goals": [
+        "Monorepo bootstrapped (Java 21/Spring Boot + Python FastAPI)",
+        "Local dev stack (Postgres+Timescale, Redis, Kafka, MinIO, Mailhog)",
+        "Shared lib-java (JWT, errors, OTel); contracts imported"
+      ],
+      "includes_prompts": [
+        "00-boot-monorepo",
+        "01-shared-libs",
+        "02-import-contracts"
+      ],
+      "deliverables": [
+        "docker-compose up brings core infra online",
+        "shared/lib-java published and used by services",
+        "OpenAPI skeletons available under shared/contracts"
+      ],
+      "smoke_tests": [
+        "docker compose ps shows all infra healthy",
+        "curl http://localhost:<any-service>/actuator/health \u2192 UP (placeholder svc ok)",
+        "contracts lint (spectral): no errors"
+      ],
+      "risks": [
+        "Gradle multi-module misconfig \u2192 fix settings.gradle.kts",
+        "Port collisions \u2192 adjust compose ports"
+      ]
+    },
+    {
+      "id": "M2-auth-identity",
+      "title": "Authentication slice: OTP \u2192 JWT",
+      "goals": [
+        "identity-svc issues JWT + refresh",
+        "Gateway or per-service JWT validation (lib-java)"
+      ],
+      "includes_prompts": [
+        "03-identity-svc"
+      ],
+      "deliverables": [
+        "POST /auth/otp/send & /auth/otp/verify live",
+        "JWT claims: sub, org_id, roles, locale, device_id"
+      ],
+      "smoke_tests": [
+        "POST /auth/otp/send \u2192 202",
+        "POST /auth/otp/verify \u2192 {access_token, refresh_token}",
+        "Call any protected stub endpoint with JWT \u2192 200"
+      ],
+      "risks": [
+        "Clock skew with JWT exp; ensure leeway \u00b160s"
+      ]
+    },
+    {
+      "id": "M3-farmer-profile",
+      "title": "Farmer profile vertical slice",
+      "goals": [
+        "profile-svc with farmer/plot entities (Flyway)",
+        "Redis cache for GET by id"
+      ],
+      "includes_prompts": [
+        "04-profile-svc"
+      ],
+      "deliverables": [
+        "POST/GET /farmers, GET /farmers/{id}",
+        "Seed data migrations; testcontainers passing"
+      ],
+      "smoke_tests": [
+        "Create farmer \u2192 fetch by id \u2192 matches",
+        "Cache hit observed (Redis TTL 60s)"
+      ],
+      "risks": [
+        "JSONB/validation drift \u2192 schema tests in CI"
+      ]
+    },
+    {
+      "id": "M4-media-inference-advisory",
+      "title": "Advisory MVP: media \u2192 ML \u2192 DB",
+      "goals": [
+        "media presign, ml inference stub, advisory persistence",
+        "Kafka event on advisory.created"
+      ],
+      "includes_prompts": [
+        "05-media-svc",
+        "06-ml-inference",
+        "07-advisory-svc"
+      ],
+      "deliverables": [
+        "POST /advisories (multipart) returns predictions + persisted record",
+        "Event published to Kafka with payload_sha256"
+      ],
+      "smoke_tests": [
+        "Presign upload works via MinIO",
+        "POST /advisories \u2192 200; GET /advisories/{id} shows record",
+        "Kafka topic advisory.created received once (idempotency checked)"
+      ],
+      "risks": [
+        "Large images \u2192 client compression + 5MB limit"
+      ]
+    },
+    {
+      "id": "M5-notary",
+      "title": "Blockchain notary integration (mock Fabric)",
+      "goals": [
+        "notary-svc API; advisory \u2192 notary hash; record fabric_tx",
+        "Anchor scheduler stub updates anchor_tx"
+      ],
+      "includes_prompts": [
+        "08-notary-svc"
+      ],
+      "deliverables": [
+        "POST /notary/hash usable from advisory listener",
+        "Anchor job writes anchor_tx back to DB"
+      ],
+      "smoke_tests": [
+        "Create advisory \u2192 fabric_tx populated within 5s",
+        "Run anchor job \u2192 anchor_tx populated"
+      ],
+      "risks": [
+        "Async failures \u2192 DLQ + retries with backoff"
+      ]
+    },
+    {
+      "id": "M6-iot-weather-prices",
+      "title": "IoT ingest + Weather + Prices",
+      "goals": [
+        "iot-svc MQTT ingest \u2192 Timescale hypertable",
+        "weather-svc adapter with 1h cache",
+        "prices-svc CSV ingest + GET /prices with trend"
+      ],
+      "includes_prompts": [
+        "09-iot-svc",
+        "10-weather-prices"
+      ],
+      "deliverables": [
+        "GET /iot/readings returns stored rows",
+        "GET /weather/forecast, GET /prices respond with normalized data"
+      ],
+      "smoke_tests": [
+        "Publish MQTT reading \u2192 query shows row",
+        "Price ingest job loads sample CSV \u2192 prices query returns trend"
+      ],
+      "risks": [
+        "Timezones & DST in TSDB \u2192 store UTC in DB"
+      ]
+    },
+    {
+      "id": "M7-forum-notifications",
+      "title": "Community forum + notifications",
+      "goals": [
+        "forum-svc threads/posts with moderation stub",
+        "notification-svc for SMS/Push"
+      ],
+      "includes_prompts": [
+        "11-forum-notification"
+      ],
+      "deliverables": [
+        "POST /threads, /posts; moderation_status transitions",
+        "POST /notify enqueues SMS/Push (Mailhog/Firebase stub)"
+      ],
+      "smoke_tests": [
+        "Create post \u2192 moderation queued \u2192 publish \u2192 notify",
+        "Toxicity score field set (stubbed)"
+      ],
+      "risks": [
+        "Abuse/spam \u2192 rate limits + shadow ban toggle"
+      ]
+    },
+    {
+      "id": "M8-gateway-observability",
+      "title": "API Gateway + SLO instrumentation",
+      "goals": [
+        "Gateway with JWT validation, CORS, rate limits",
+        "OTel + Prometheus metrics; Grafana dashboards"
+      ],
+      "includes_prompts": [
+        "12-gateway-security",
+        "13-observability"
+      ],
+      "deliverables": [
+        "Declarative routes, per-route RBAC",
+        "Dashboards for API p95, error_rate, ML latency, MQTT lag"
+      ],
+      "smoke_tests": [
+        "Protected routes 401 without JWT; 200 with valid JWT",
+        "Dashboards show live metrics during simple load"
+      ],
+      "risks": [
+        "CORS misconfig \u2192 add integration tests"
+      ]
+    },
+    {
+      "id": "M9-ci-compose",
+      "title": "CI pipelines + local smoke tests",
+      "goals": [
+        "GH Actions for build/test/lint, docker buildx, trivy",
+        "PR smoke test boots compose and runs end-to-end checks"
+      ],
+      "includes_prompts": [
+        "14-ci-compose"
+      ],
+      "deliverables": [
+        "CI green on main; PRs run smoke suite",
+        "Compose healthchecks for all services"
+      ],
+      "smoke_tests": [
+        "OTP\u2192JWT, profile create/get, advisory flow, inference call",
+        "Forum post moderation + notification"
+      ],
+      "risks": [
+        "Flaky tests \u2192 increase timeouts & retries"
+      ]
+    },
+    {
+      "id": "M10-web-pwa",
+      "title": "Farmer Web App (PWA) \u2013 Responsive + Offline",
+      "goals": [
+        "Next.js (React) web client with responsive layout (mobile \u2192 desktop)",
+        "PWA: installable, offline cache (Workbox), background sync for advisories/ledger",
+        "Shared TypeScript SDK generated from OpenAPI"
+      ],
+      "includes_prompts": [
+        "15-web-app",
+        "16-ts-sdk",
+        "17-pwa-offline"
+      ],
+      "deliverables": [
+        "Public web app with OTP login and localized UI",
+        "Offline home, prices, weather; queued advisory uploads"
+      ],
+      "smoke_tests": [
+        "Login via OTP; refresh preserves session",
+        "Toggle offline: create ledger entry; reconnect \u2192 sync succeeds",
+        "Lighthouse PWA score \u2265 90"
+      ],
+      "risks": [
+        "CORS misconfiguration \u2192 add e2e tests against gateway",
+        "Cache staleness \u2192 cache bust strategy with SW versioning"
+      ]
+    },
+    {
+      "id": "M11-admin-console",
+      "title": "Admin/Operations Console \u2013 Desktop-first",
+      "goals": [
+        "React Admin Console (MUI/Tailwind) for content ops and moderation",
+        "Views: farmers, advisories, forum queue, schemes CMS, metrics dashboards",
+        "RBAC: admin, moderator, content-editor roles"
+      ],
+      "includes_prompts": [
+        "18-admin-console"
+      ],
+      "deliverables": [
+        "Moderation queue with approve/reject and audit trail",
+        "Schemes CRUD with localization fields"
+      ],
+      "smoke_tests": [
+        "Moderator approves a queued post \u2192 notification sent",
+        "Editor publishes a scheme \u2192 visible in mobile/web"
+      ],
+      "risks": [
+        "Permission leaks \u2192 add backend ABAC checks and route guards"
+      ]
+    },
+    {
+      "id": "M12-web-deploy-security",
+      "title": "Web Deployment, CORS & Security Headers",
+      "goals": [
+        "CI deploy of web app to CDN (Vercel/Netlify or S3+CloudFront)",
+        "Hardened CORS at gateway + strict security headers on web",
+        "Domain & TLS automation"
+      ],
+      "includes_prompts": [
+        "19-web-deploy",
+        "20-cors-security"
+      ],
+      "deliverables": [
+        "Public URL for PWA and admin console",
+        "CSP/STS/referrer-policy and integrity checks configured"
+      ],
+      "smoke_tests": [
+        "CORS preflight passes for all allowed routes, blocks others",
+        "ZAP baseline scan: no high-severity findings"
+      ],
+      "risks": [
+        "Overly strict CSP breaking SW \u2192 test and iterate"
+      ]
+    }
+  ],
+  "prompts": [
+    {
+      "id": "00-boot-monorepo",
+      "title": "Bootstrap monorepo and dev stack",
+      "prompt": "You are a principal engineer. Create a multi-module monorepo named 'kisanconnect' for a microservices project. Use Java 21 + Spring Boot 3.3 (Gradle Kotlin DSL) for services and a separate Python FastAPI package for ML inference. Add:\\n- root README with overview, local dev steps (docker-compose) and service map\\n- .editorconfig, .gitignore, CODEOWNERS, pre-commit config (spotless for Java, black for Python)\\n- .github/workflows: java build/test, python lint/test, docker build per service\\n- docker-compose with: postgres (with timescaledb extension), redis, kafka+zookeeper, minio, mailhog (SMS stub)\\n- a 'shared/contracts' folder to hold OpenAPI YAMLs\\nInitialize Gradle projects, settings.gradle.kts with composite builds."
+    },
+    {
+      "id": "01-shared-libs",
+      "title": "Shared Java lib & error model",
+      "prompt": "Create a 'shared/lib-java' Gradle module for common code:\\n- JWT auth filter + RBAC helper; extract org_id, roles, locale from JWT\\n- RFC7807 ProblemDetails error model + global exception handlers\\n- OpenTelemetry autoconfigure; Micrometer/Prometheus\\nPublish this module to local maven so other services can depend on it via settings.gradle.kts."
+    },
+    {
+      "id": "02-import-contracts",
+      "title": "Import OpenAPI contracts",
+      "prompt": "Create 'shared/contracts' and add OpenAPI 3.1 YAML skeletons for identity, profile, weather, prices, advisory, schemes, forum, ledger, iot, notary, notification, media. Wire springdoc-openapi to serve /v3/api-docs and Swagger UI in each service using these contracts as source of truth."
+    },
+    {
+      "id": "03-identity-svc",
+      "title": "identity-svc (OTP \u2192 JWT)",
+      "prompt": "Create service 'services/identity-svc' (Spring Boot):\\n- Endpoints: POST /auth/otp/send, POST /auth/otp/verify (per OpenAPI)\\n- SmsGateway interface with LocalSmsGateway impl writing OTP to stdout + Mailhog\\n- Issue JWT (HS256) + refresh token; claims: sub(farmer_id), org_id, roles, locale, device_id; 15m access, 7d refresh\\n- Tests: unit + slice + minimal integration; OpenAPI via springdoc; Dockerfile\\n- Add Gradle dependencies on shared/lib-java"
+    },
+    {
+      "id": "04-profile-svc",
+      "title": "profile-svc (farmer/plot)",
+      "prompt": "Create 'services/profile-svc' with Postgres + Flyway:\\n- Tables: farmer, plot (per ERD); JSONB fields where flexible\\n- Endpoints: POST/GET /farmers, GET /farmers/{id} (per OpenAPI)\\n- Redis cache for GET by id (TTL 60s)\\n- Testcontainers for integration tests; Dockerfile\\n- Seed demo data migration"
+    },
+    {
+      "id": "05-media-svc",
+      "title": "media-svc (presigned upload)",
+      "prompt": "Create 'services/media-svc':\\n- POST /media/sign \u2192 returns presigned PUT + GET URLs (use AWS SDK; MinIO in docker-compose)\\n- Validate content-type, max 5MB; return expiry; log audit event\\n- Unit tests + Dockerfile"
+    },
+    {
+      "id": "06-ml-inference",
+      "title": "ml/inference (FastAPI)",
+      "prompt": "Create 'ml/inference' FastAPI service:\\n- POST /infer { image_url } \u2192 returns top3 labels + confidences + model_version + explanation stub\\n- Deterministic stub model for now; structure for TorchServe/ONNX later\\n- Uvicorn config, health checks, pytest, Dockerfile"
+    },
+    {
+      "id": "07-advisory-svc",
+      "title": "advisory-svc (image\u2192ML\u2192DB\u2192event\u2192notary)",
+      "prompt": "Create 'services/advisory-svc':\\n- POST /advisories (multipart): obtain presigned URL from media-svc, upload, compute SHA-256(payload JSON), call ml-inference, persist advisory, publish Kafka 'advisory.created' with advisory_id + payload_sha256\\n- Listener consumes 'advisory.created', calls notary-svc /notary/hash \u2192 updates advisory.fabric_tx\\n- GET /advisories/{id}\\n- Postgres + Flyway schema, tests, Dockerfile"
+    },
+    {
+      "id": "08-notary-svc",
+      "title": "notary-svc (Fabric + anchor)",
+      "prompt": "Create 'services/notary-svc':\\n- POST /notary/hash { ownerId, type, sha256 } \u2192 call FabricClient (mock impl for local), return fabric_tx; persist mapping\\n- Scheduled /anchor/run (or cron job) batches recent Fabric block hash to a simulated public chain; updates anchor_tx on related records\\n- Tests + Dockerfile"
+    },
+    {
+      "id": "09-iot-svc",
+      "title": "iot-svc (ingest + advice)",
+      "prompt": "Create 'services/iot-svc':\\n- MQTT consumer for topic iot/{device_id}; persist to TimescaleDB hypertable iot_reading\\n- GET /iot/readings?device_id&from=...\\n- Simple irrigation rule: if soil_moisture<threshold AND forecast no-rain next 24h, POST /notify to notification-svc\\n- Tests + Dockerfile"
+    },
+    {
+      "id": "10-weather-prices",
+      "title": "weather-svc & prices-svc",
+      "prompt": "Create 'services/weather-svc' with provider adapter pattern (Open-Meteo stub) + 1h cache per lat/lon.\\nCreate 'services/prices-svc' to ingest CSV for market_price and serve GET /prices with nearest mandis and 7-day trend. Add tests + Dockerfiles."
+    },
+    {
+      "id": "11-forum-notification",
+      "title": "forum-svc & notification-svc",
+      "prompt": "Create 'services/forum-svc' with threads/posts tables, moderation_status, toxicity_score. On create, call moderation stub and set queued/published, then POST /notify to notification-svc when published.\\nCreate 'services/notification-svc' with POST /notify { channel: SMS|PUSH, template_id, params }; Local SMS \u2192 stdout/Mailhog; push: Firebase stub. Add tests + Dockerfiles."
+    },
+    {
+      "id": "12-gateway-security",
+      "title": "API Gateway and security",
+      "prompt": "Add Spring Cloud Gateway or Kong declarative config under 'services/gateway':\\n- Validate JWT from identity-svc; per-route RBAC\\n- Rate-limits: default 60 rpm/IP; 5 rpm for POST /advisories\\n- CORS: allow mobile app schemes only; block others\\n- Health checks / readiness endpoints for all services"
+    },
+    {
+      "id": "13-observability",
+      "title": "Observability & SLOs",
+      "prompt": "Instrument all services with OpenTelemetry + Micrometer (Prometheus). Add Grafana dashboards (API RPS, p95 latency, error_rate; ML inference latency; MQTT lag). Add synthetic check that posts advisory then validates GET by id within 10s. Document SLOs in README."
+    },
+    {
+      "id": "14-ci-compose",
+      "title": "CI and docker-compose integration",
+      "prompt": "Update docker-compose to wire ports, env, healthchecks for all services. In GitHub Actions: build & unit tests per service, docker buildx, trivy scan, cache Gradle and pip, push images on main branch. Add a PR workflow that boots compose and runs smoke tests (identity, profile, advisory, inference)."
+    },
+    {
+      "id": "15-web-app",
+      "title": "Create Next.js farmer web app (responsive)",
+      "prompt": "Create app 'web/farmer' using Next.js 14 (App Router) + TypeScript + Tailwind. Pages: /login (OTP), /home (weather, prices, shortcuts), /advisories (list + upload), /ledger, /schemes, /forum. Use server components for SEO-safe pages where possible; client components for interactive forms. Add i18n (next-intl) with Hindi, Marathi, Telugu, Tamil, Bengali. Integrate JWT from identity-svc; persist in HttpOnly secure cookies. Add reusable UI components (Card, List, DataTable)."
+    },
+    {
+      "id": "16-ts-sdk",
+      "title": "Generate shared TypeScript SDK from OpenAPI",
+      "prompt": "Using openapi-typescript or openapi-generator, produce 'shared/sdk-ts' with typed clients for all services (identity, profile, prices, weather, advisory, forum, etc.). Publish as a local workspace package and consume it in 'web/farmer' and 'web/admin'."
+    },
+    {
+      "id": "17-pwa-offline",
+      "title": "Enable PWA + offline + background sync",
+      "prompt": "In 'web/farmer': add manifest.json, icons, and Workbox service worker. Cache strategies: stale-while-revalidate for GET /weather/forecast and /prices; network-first with fallback for /schemes; queue POSTs (advisories, ledger) via background sync with IndexedDB outbox. Add a 'Sync Center' UI to show pending operations. Add Lighthouse config; aim PWA score \u2265 90."
+    },
+    {
+      "id": "18-admin-console",
+      "title": "Create desktop-first Admin Console",
+      "prompt": "Create 'web/admin' (Next.js + MUI/Tailwind). Routes: /dashboard (stats from Prometheus/gateway), /farmers, /advisories, /forum/moderation-queue, /schemes (CMS CRUD), /translations. Implement RBAC guards: admin, moderator, editor. Hook moderation actions to forum-svc; write audit logs. Add tables with server-side pagination and filters."
+    },
+    {
+      "id": "19-web-deploy",
+      "title": "Set up web deployment (CDN + CI)",
+      "prompt": "Add GitHub Actions to build and deploy 'web/farmer' and 'web/admin' to Vercel/Netlify or S3+CloudFront (pick one and generate IaC if S3+CF). Configure environment variables (API base URLs), asset caching (immutable hashed files), and SW versioning. Output public URLs in the build summary."
+    },
+    {
+      "id": "20-cors-security",
+      "title": "Gateway CORS + Security Headers",
+      "prompt": "At API gateway: configure CORS to allow origins ['https://farmer.example.com','https://admin.example.com'] and mobile app schemes; block others. Methods: GET,POST,PUT,DELETE,OPTIONS; headers: Authorization, Content-Type. Set security headers on web apps: Content-Security-Policy (script-src 'self' with hashed bundles; connect-src to API/CDN), Strict-Transport-Security, X-Content-Type-Options, Referrer-Policy, Permissions-Policy. Add e2e tests to verify preflight and header presence."
+    }
+  ],
+  "variables": {
+    "jwt_secret": "set a local dev value in .env",
+    "db_password": "use docker-compose secrets or env",
+    "minio_keys": "MINIO_ROOT_USER/MINIO_ROOT_PASSWORD",
+    "kafka": "PLAINTEXT localhost:9092 for dev",
+    "mqtt": "optional add mosquitto service for IoT tests"
+  },
+  "post_setup_checks": [
+    "docker compose up -d; confirm health endpoints",
+    "OTP\u2192JWT works; use JWT to call protected endpoints",
+    "Advisory flow: presign \u2192 upload \u2192 inference \u2192 persist \u2192 notary (mock) \u2192 anchor",
+    "IoT publish/readings; weather & prices respond; forum moderation triggers notifications",
+    "Web PWA builds and loads offline; Admin console RBAC works; CORS preflights pass"
+  ]
+}

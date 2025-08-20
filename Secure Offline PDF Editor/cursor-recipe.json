@@ -22,7 +22,12 @@
         {
           "id": "ui-shell",
           "title": "JavaFX UI (MVP Shell)",
-          "text": "Implement minimal JavaFX UI:\n- BorderPane layout.\n- Centered scrollable PDF viewer.\n- Menu items (Adobe-style) with icons & shortcuts for Open, Save, Zoom, Undo, Redo.\n- Bottom toolbar: zoom slider + page number display.\n- File → Open/Save with `PDFService`.\n- Support pagination (Next/Previous Page).\n- Undo/Redo stack for zoom/pagination.\n- Error handling dialogs for failed file operations.\n\nPackage: `com.securepdfeditor.ui`"
+          "text": "Implement minimal JavaFX UI:\n- BorderPane layout.\n- Centered scrollable PDF viewer.\n- Menu items (Adobe-style) with icons & shortcuts for New, Open, Save, Zoom, Undo, Redo.\n- Bottom toolbar: zoom slider + page number display (+ jump-to-page field).\n- File → Open/Save with `PDFService`.\n- Pagination (Next/Previous Page).\n- Undo/Redo stack for zoom/pagination.\n- Error handling dialogs for failed file operations.\n\nPackage: `com.securepdfeditor.ui`"
+        },
+        {
+          "id": "error-handler",
+          "title": "Centralized Error Handler",
+          "text": "Implement a centralized `ErrorHandler` utility class under package `com.securepdfeditor.util`.\n\nFeatures:\n1. Static methods to show user-friendly error dialogs for exceptions (invalid PDF, wrong password, file I/O issues).\n2. Log all exceptions to a timestamped local log file for offline troubleshooting.\n3. Provide convenience methods to wrap PDFBox, BouncyCastle, and JavaFX operations with try-catch blocks.\n4. Ensure all UI prompts, menu actions, bottom toolbar interactions, and PDF operations use this ErrorHandler.\n5. Include unit tests for all error handling methods."
         }
       ]
     },
@@ -32,8 +37,8 @@
       "prompts": [
         {
           "id": "editing-tools",
-          "title": "Editing Tools",
-          "text": "Enhance PDF editing:\n- Text Editing: add/delete/modify using `PDPageContentStream`.\n- Image Insertion: JPG/PNG with resize & reposition.\n- Shape Drawing: rectangles, circles, lines.\n- Annotation Tools: highlight, underline, strike-through, sticky notes.\n- Multi-object Selection via drag.\n- Menu items for each function with icons.\n- Error handling: alert on invalid operations.\n\nPackage: `com.securepdfeditor.editing`"
+          "title": "Editing Tools (Adobe-like)",
+          "text": "Enhance PDF editing (Adobe-like feature set):\n- Text Editing: add/delete/modify using `PDPageContentStream`; support font family, size, bold/italic, color, alignment (left/center/right/justify), line spacing.\n- Object Tools: move, resize, rotate; constrain with Shift (proportional) and Alt (from center); snap-to-grid/guides.\n- Image Insertion: JPG/PNG with resize & reposition; basic image compression options on save (low/med/high).\n- Shape Drawing: rectangles, circles, lines, arrows; fill/stroke color, stroke width, dash pattern, opacity.\n- Annotation Tools: highlight, underline, strike-through, sticky notes, freehand ink.\n- Align & Distribute: align left/right/top/bottom/center; distribute horiz/vert for multi-selection.\n- Properties Panel: dockable panel showing selected object properties (X/Y, W/H, rotation, colors, font, opacity); live updates.\n- Error handling: alert on invalid operations or unsupported content.\n\nPackage: `com.securepdfeditor.editing`"
         },
         {
           "id": "signing",
@@ -42,20 +47,25 @@
         },
         {
           "id": "ui-extensions",
-          "title": "UI Extensions for Editing & Signing",
-          "text": "Update JavaFX UI:\n- Adobe-style menu only (remove toolbar buttons).\n- Menu icons and shortcuts assigned.\n- Side panel for layers/objects.\n- Context menus for properties.\n- Signature panel modal.\n- Centered PDF display maintained.\n- Multi-page zoom centering maintained.\n- Bottom toolbar: zoom slider + page number.\n- Error handling for invalid edits.\n\nPackage: `com.securepdfeditor.ui`"
+          "title": "UI Extensions (Adobe-style Menu + Bottom Bar)",
+          "text": "Update JavaFX UI:\n- Adobe-style menu only (remove top toolbar buttons).\n- Menu icons and Windows shortcuts assigned (see `ui_mapping`).\n- Side Panels: Layers/Objects panel; **Pages/Thumbnails panel** placeholder (implemented fully in Milestone-3).\n- Context menus for object properties.\n- Centered PDF display maintained during zoom/resize.\n- Bottom toolbar: zoom slider, `%` readout, page number, jump-to-page input, prev/next with tooltips and context menus.\n- Error handling for invalid edits.\n\nPackage: `com.securepdfeditor.ui`"
         },
         {
           "id": "layout-design",
-          "title": "Layout & Page Management",
-          "text": "Layout controls:\n- Grid overlay + snap.\n- Layer reordering (bring forward/backward).\n- Page Management: add, delete, reorder, rotate.\n- Centered PDF page display using StackPane.\n- Undo/Redo support for these actions.\n- Error handling for invalid page operations.\n\nPackage: `com.securepdfeditor.layout`"
+          "title": "Layout, Guides & Page Ops",
+          "text": "Layout controls:\n- Grid overlay + snap; configurable grid size and visibility toggle.\n- Rulers (top/left) with draggable guides; snapping.\n- Layer reordering (bring forward/backward); lock/hide layers.\n- Page ops (menu): add/delete/reorder/rotate current page.\n- Centered PDF page display using StackPane.\n- Undo/Redo coverage for all actions.\n- Error handling for invalid page operations.\n\nPackage: `com.securepdfeditor.layout`"
         }
       ]
     },
     {
       "id": "milestone-3",
-      "title": "Advanced Usability & Forms",
+      "title": "Advanced Usability, Pages Panel & Forms",
       "prompts": [
+        {
+          "id": "pages-panel",
+          "title": "Pages/Thumbnails Panel (Adobe-like)",
+          "text": "Implement a left docked **Pages panel** with thumbnails and page management:\n\n1. Thumbnails: render page thumbnails using PDFBox at small/medium/large sizes; lazy-load and cache; refresh on edits.\n2. Selection: single and multi-select (Ctrl/Shift). Show page numbers. Keyboard: Up/Down to move selection, Enter to open.\n3. Actions:\n   - Double-click thumbnail → navigate to that page.\n   - Drag-and-drop reordering of pages with visual insertion marker; update document order.\n   - Context menu on thumbnail: Open, Duplicate Page, Insert Page Before/After, Rotate 90° CW/CCW, Delete Page, Extract to New PDF, Set Page Label.\n4. Integrations:\n   - Sync with bottom toolbar page indicator and main viewer.\n   - Undo/Redo support for reorder/insert/delete/rotate.\n5. Performance: background thumbnail generation; cancel in-flight tasks on close; cache invalidation per page.\n6. Error Handling: invalid ranges, protected docs, I/O failures via `ErrorHandler`.\n\nUI: left `SplitPane` with collapsible Pages panel. Icons: `/icons/pages.png` for panel toggle.\n\nPackage: `com.securepdfeditor.pages`"
+        },
         {
           "id": "forms",
           "title": "Form Handling",
@@ -64,23 +74,23 @@
         {
           "id": "search-navigation",
           "title": "Search & Navigation",
-          "text": "Navigation:\n- Menu items: Find (/icons/search.png), Bookmarks (/icons/bookmark.png), TOC (/icons/toc.png)\n- Text search highlighting.\n- Bookmark creation/navigation.\n- Auto/manual TOC.\n- Error handling for invalid searches/bookmarks.\n\nPackage: `com.securepdfeditor.navigation`"
+          "text": "Navigation:\n- Menu items: Find (/icons/search.png), Bookmarks (/icons/bookmark.png), TOC (/icons/toc.png)\n- Text search highlighting across pages; next/prev hit; case sensitivity.\n- Bookmark creation/navigation; persist bookmarks in doc.\n- Auto/manual TOC; clickable entries.\n- Error handling for invalid searches/bookmarks.\n\nPackage: `com.securepdfeditor.navigation`"
         },
         {
           "id": "pdf-assembly",
-          "title": "PDF Assembly (Merge & Split)",
-          "text": "Multi-file handling:\n- Menu items: Merge (/icons/merge.png), Split (/icons/split.png), Insert Pages (/icons/insert.png)\n- Merge PDFs at beginning, end, or after page number.\n- Split pages into new PDF.\n- Insert pages from other PDFs.\n- Respect encrypted PDFs.\n- Error handling: invalid page ranges or corrupted files.\n\nPackage: `com.securepdfeditor.assembly`"
+          "title": "PDF Assembly (Merge, Split, Insert)",
+          "text": "Multi-file handling:\n- Menu items: Merge (/icons/merge.png), Split (/icons/split.png), Insert Pages (/icons/insert.png)\n- Merge PDFs at beginning, end, or after page number.\n- Split pages into new PDF.\n- Insert pages from other PDFs; choose ranges.\n- Respect encrypted PDFs.\n- Error handling: invalid page ranges or corrupted files.\n\nPackage: `com.securepdfeditor.assembly`"
         }
       ]
     },
     {
       "id": "milestone-4",
-      "title": "Power-User & Internationalization",
+      "title": "Power-User, OCR & Internationalization",
       "prompts": [
         {
           "id": "undo-redo",
           "title": "Undo/Redo",
-          "text": "Undo/Redo menu:\n- Undo (/icons/undo.png, Ctrl+Z), Redo (/icons/redo.png, Ctrl+Y)\n- Full action history.\n- Persist stack until doc close.\n- Error handling: disable undo/redo if empty.\n\nPackage: `com.securepdfeditor.history`"
+          "text": "Undo/Redo menu:\n- Undo (/icons/undo.png, Ctrl+Z), Redo (/icons/redo.png, Ctrl+Y)\n- Full action history with branching.\n- Persist stack until doc close.\n- Error handling: disable undo/redo if empty.\n\nPackage: `com.securepdfeditor.history`"
         },
         {
           "id": "ocr",
@@ -99,9 +109,14 @@
       "title": "Packaging & Maintenance",
       "prompts": [
         {
+          "id": "preflight-export",
+          "title": "Preflight, PDF/A Export & Print Settings",
+          "text": "Add professional export features (offline):\n- Preflight checks: missing fonts, oversized images, non-embedded fonts; show report.\n- Export profiles: PDF, PDF/A-1b toggle; image downsampling options (150/300 dpi).\n- Print dialog integration: page range, fit/scale, orientation, duplex where available.\n- Error handling for export/print failures.\n\nPackage: `com.securepdfeditor.export`"
+        },
+        {
           "id": "packaging",
           "title": "Cross-Platform Packaging",
-          "text": "Offline packaging:\n- Menu item: Build (/icons/build.png)\n- jlink runtime image.\n- jpackage installers (MSI/DMG/DEB).\n- Bundle JavaFX runtime.\n- Error handling for packaging failures.\n- Output: `/dist`\n"
+          "text": "Offline packaging:\n- Menu item: Build (/icons/build.png)\n- jlink runtime image.\n- jpackage installers (MSI/DMG/DEB).\n- Bundle JavaFX runtime.\n- Error handling for packaging failures.\n- Output: `/dist`"
         },
         {
           "id": "updates",
@@ -109,31 +124,94 @@
           "text": "Build-time quality:\n- Menu item: Check Updates (/icons/update.png)\n- SpotBugs static analysis.\n- OWASP Dependency Check.\n- Gradle automated testing & packaging.\n- Version catalog (`libs.versions.toml`).\n- Error handling: alert on failed checks.\n- CI pipeline (GitHub Actions/GitLab CI) for build+test+package."
         }
       ]
+    },
+    {
+      "id": "milestone-6",
+      "title": "PDF Creation",
+      "prompts": [
+        {
+          "id": "pdf-creation",
+          "title": "Create New PDFs (Blank, Templates & Styles)",
+          "text": "Implement PDF creation functionality:\n1. File → New (Ctrl+N): dialog for page size (A4, Letter, Legal, Custom WxH), orientation, initial page count; default margins.\n2. File → New From Template: choose built-in templates (Lined Page, Grid Page, Title Page, Meeting Notes) under `/src/main/resources/templates/`.\n3. Text Styles: define reusable text styles (Heading 1/2, Body, Caption) with font/size/weight/color/leading; apply via Properties panel and context menu.\n4. Paragraph Tools: alignment, spacing before/after, bullets/numbered lists (simple), hyphenation toggle.\n5. Insert Elements: text box, image, shape via menu; snap to guides; auto-safe layer for created content.\n6. Multi-page Add: add N pages at creation; later add/remove via Pages panel.\n7. Save As: export created PDF; optional encrypt-on-save using BouncyCastle.\n8. Tests: creation (blank & templates), style application, multi-page creation; verify sizes/orientation.\n9. Error handling: invalid custom sizes, template load errors, write failures via `ErrorHandler`.\n\nPackage: `com.securepdfeditor.creation`"
+        }
+      ]
     }
   ],
   "ui_mapping": {
-    "file": {"open": {"icon": "/icons/open.png", "shortcut": "Ctrl+O"}, "save": {"icon": "/icons/save.png", "shortcut": "Ctrl+S"}, "saveAs": {"icon": "/icons/save_as.png", "shortcut": "Ctrl+Shift+S"}, "print": {"icon": "/icons/print.png", "shortcut": "Ctrl+P"}, "importPages": {"icon": "/icons/insert.png"}, "merge": {"icon": "/icons/merge.png"}, "split": {"icon": "/icons/split.png"}},
-    "edit": {"undo": {"icon": "/icons/undo.png", "shortcut": "Ctrl+Z"}, "redo": {"icon": "/icons/redo.png", "shortcut": "Ctrl+Y"}, "cut": {"icon": "/icons/cut.png", "shortcut": "Ctrl+X"}, "copy": {"icon": "/icons/copy.png", "shortcut": "Ctrl+C"}, "paste": {"icon": "/icons/paste.png", "shortcut": "Ctrl+V"}},
-    "view": {"zoomIn": {"icon": "/icons/zoom_in.png", "shortcut": "Ctrl+Plus"}, "zoomOut": {"icon": "/icons/zoom_out.png", "shortcut": "Ctrl+Minus"}, "pagePrev": {"icon": "/icons/page_prev.png"}, "pageNext": {"icon": "/icons/page_next.png"}},
-    "forms": {"textField": {"icon": "/icons/textfield.png"}, "checkbox": {"icon": "/icons/checkbox.png"}, "radioButton": {"icon": "/icons/radiobutton.png"}},
-    "annotations": {"highlight": {"icon": "/icons/highlight.png"}, "underline": {"icon": "/icons/underline.png"}, "strikeThrough": {"icon": "/icons/strikethrough.png"}, "stickyNote": {"icon": "/icons/sticky_note.png"}, "shapes": {"icon": "/icons/shape_rect.png"}},
-    "sign": {"draw": {"icon": "/icons/sign_draw.png"}, "upload": {"icon": "/icons/sign_upload.png"}, "certificate": {"icon": "/icons/sign_cert.png"}},
-    "ocr": {"run": {"icon": "/icons/ocr.png"}},
-    "language": {"select": {"icon": "/icons/language.png"}},
-    "build": {"package": {"icon": "/icons/build.png"}},
-    "update": {"check": {"icon": "/icons/update.png"}}
+    "file": {
+      "new": { "icon": "/icons/new.png", "shortcut": "Ctrl+N" },
+      "newFromTemplate": { "icon": "/icons/template.png", "shortcut": null },
+      "open": { "icon": "/icons/open.png", "shortcut": "Ctrl+O" },
+      "save": { "icon": "/icons/save.png", "shortcut": "Ctrl+S" },
+      "saveAs": { "icon": "/icons/save_as.png", "shortcut": "Ctrl+Shift+S" },
+      "print": { "icon": "/icons/print.png", "shortcut": "Ctrl+P" },
+      "importPages": { "icon": "/icons/insert.png" },
+      "merge": { "icon": "/icons/merge.png" },
+      "split": { "icon": "/icons/split.png" }
+    },
+    "edit": {
+      "undo": { "icon": "/icons/undo.png", "shortcut": "Ctrl+Z" },
+      "redo": { "icon": "/icons/redo.png", "shortcut": "Ctrl+Y" },
+      "cut": { "icon": "/icons/cut.png", "shortcut": "Ctrl+X" },
+      "copy": { "icon": "/icons/copy.png", "shortcut": "Ctrl+C" },
+      "paste": { "icon": "/icons/paste.png", "shortcut": "Ctrl+V" },
+      "align": { "icon": "/icons/align.png" },
+      "distribute": { "icon": "/icons/distribute.png" },
+      "propertiesPanel": { "icon": "/icons/properties.png" }
+    },
+    "view": {
+      "zoomIn": { "icon": "/icons/zoom_in.png", "shortcut": "Ctrl+Plus" },
+      "zoomOut": { "icon": "/icons/zoom_out.png", "shortcut": "Ctrl+Minus" },
+      "togglePagesPanel": { "icon": "/icons/pages.png", "shortcut": "F4" },
+      "pagePrev": { "icon": "/icons/page_prev.png" },
+      "pageNext": { "icon": "/icons/page_next.png" }
+    },
+    "pagesPanel": {
+      "duplicate": { "icon": "/icons/duplicate.png" },
+      "insertBefore": { "icon": "/icons/insert_before.png" },
+      "insertAfter": { "icon": "/icons/insert_after.png" },
+      "rotateCW": { "icon": "/icons/rotate_cw.png", "shortcut": "Ctrl+R" },
+      "rotateCCW": { "icon": "/icons/rotate_ccw.png" },
+      "delete": { "icon": "/icons/delete.png", "shortcut": "Delete" },
+      "extract": { "icon": "/icons/extract.png" },
+      "label": { "icon": "/icons/label.png" }
+    },
+    "forms": {
+      "textField": { "icon": "/icons/textfield.png" },
+      "checkbox": { "icon": "/icons/checkbox.png" },
+      "radioButton": { "icon": "/icons/radiobutton.png" }
+    },
+    "annotations": {
+      "highlight": { "icon": "/icons/highlight.png" },
+      "underline": { "icon": "/icons/underline.png" },
+      "strikeThrough": { "icon": "/icons/strikethrough.png" },
+      "stickyNote": { "icon": "/icons/sticky_note.png" },
+      "shapes": { "icon": "/icons/shape_rect.png" },
+      "ink": { "icon": "/icons/ink.png" }
+    },
+    "sign": {
+      "draw": { "icon": "/icons/sign_draw.png" },
+      "upload": { "icon": "/icons/sign_upload.png" },
+      "certificate": { "icon": "/icons/sign_cert.png" }
+    },
+    "ocr": { "run": { "icon": "/icons/ocr.png" } },
+    "language": { "select": { "icon": "/icons/language.png" } },
+    "build": { "package": { "icon": "/icons/build.png" } },
+    "update": { "check": { "icon": "/icons/update.png" } }
   },
   "cursor_hints": {
-    "strategy": "Minimize credit usage by generating code incrementally per milestone.",
+    "strategy": "Minimize credit usage by generating code incrementally per milestone. Favor clear interfaces and reusable services (PDFService, ThumbnailService, StyleService).",
     "steps": [
-      "1. Implement Milestone-1: project setup, offline security, core PDF viewer, centered display.",
-      "2. Commit and test each feature locally before generating next milestone.",
-      "3. For Milestone-2, generate editing and signing features with menu-only UI, icons & shortcuts.",
-      "4. For Milestone-3, implement forms, search/navigation, PDF assembly with menu integration and error handling.",
-      "5. For Milestone-4, implement undo/redo, OCR, and i18n step-by-step, verifying centered PDF behavior.",
-      "6. For Milestone-5, implement packaging and maintenance tasks after all functionality is validated.",
-      "7. Use the `ui_mapping` section to ensure Cursor applies icons and shortcuts correctly.",
-      "8. Generate code per milestone in small chunks to minimize credits and allow review/testing."
+      "1. Finish/verify Milestone-1 core viewer, centered layout, ErrorHandler.",
+      "2. Implement Milestone-2 editing incrementally: start with text, then images, shapes, then properties panel & align/distribute.",
+      "3. Add rulers/guides and snapping before heavy features to reduce rework.",
+      "4. Build Milestone-3 Pages panel using a virtualized list; enable drag-reorder with undo/redo.",
+      "5. Implement assembly (merge/split/insert) reusing the Pages panel selections for ranges.",
+      "6. Add OCR and i18n (Milestone-4) only after viewer/editing stabilization to avoid conflicts.",
+      "7. Add preflight and PDF/A export (Milestone-5) last; reuse existing render/scan passes when possible.",
+      "8. Add creation (Milestone-6): start with File→New and templates, then styles and paragraph tools.",
+      "9. Cache thumbnails and page images; invalidate only affected pages on edits to preserve performance.",
+      "10. Keep all dialogs and I/O wrapped in ErrorHandler. Write small, focused tests after each feature."
     ]
   }
 }
