@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyTitle>Secure Family PDF Tests</AssemblyTitle>
+    <Description>Unit and integration tests for Secure Family PDF Software</Description>
+    <RootNamespace>SecureFamilyPdf.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SecureFamilyPdf.Core\SecureFamilyPdf.Core.csproj" />
+    <ProjectReference Include="..\..\src\SecureFamilyPdf\SecureFamilyPdf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Testing Framework -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.6.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    
+    <!-- Mocking -->
+    <PackageReference Include="Moq" Version="4.20.69" />
+    
+    <!-- Test Utilities -->
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    
+    <!-- WPF Testing -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestData\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

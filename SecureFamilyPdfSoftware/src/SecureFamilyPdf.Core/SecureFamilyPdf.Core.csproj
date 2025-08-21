@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyTitle>Secure Family PDF Core Library</AssemblyTitle>
+    <Description>Core PDF processing and security library for Secure Family PDF Software</Description>
+    <RootNamespace>SecureFamilyPdf.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- PDF Processing -->
+    <PackageReference Include="PdfiumViewer" Version="2.13.0" />
+    <PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="2017.11.2.204" />
+    
+    <!-- PDF Generation and Manipulation -->
+    <PackageReference Include="QuestPDF" Version="2023.12.6" />
+    
+    <!-- Security and Validation -->
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.1" />
+    
+    <!-- Logging -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    
+    <!-- Testing Support -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Native\**\*" Pack="true" PackagePath="native" />
+  </ItemGroup>
+</Project>

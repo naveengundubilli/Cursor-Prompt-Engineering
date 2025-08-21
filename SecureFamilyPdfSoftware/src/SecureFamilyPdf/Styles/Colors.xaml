@@ -1,0 +1,73 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- Adobe-style Color Palette -->
+    
+    <!-- Window Colors -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="TextBrush" Color="#2C2C2C"/>
+    
+    <!-- Menu Colors -->
+    <SolidColorBrush x:Key="MenuBackgroundBrush" Color="#E6E6E6"/>
+    <SolidColorBrush x:Key="MenuTextBrush" Color="#2C2C2C"/>
+    <SolidColorBrush x:Key="MenuHoverBrush" Color="#D0D0D0"/>
+    <SolidColorBrush x:Key="MenuPressedBrush" Color="#B8B8B8"/>
+    
+    <!-- Status Bar Colors -->
+    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#E6E6E6"/>
+    <SolidColorBrush x:Key="StatusBarTextBrush" Color="#2C2C2C"/>
+    
+    <!-- Toolbar Colors -->
+    <SolidColorBrush x:Key="ToolBarBackgroundBrush" Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="ToolBarTextBrush" Color="#2C2C2C"/>
+    <SolidColorBrush x:Key="ToolBarBorderBrush" Color="#CCCCCC"/>
+    
+    <!-- Button Colors -->
+    <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="ButtonTextBrush" Color="#2C2C2C"/>
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="ButtonHoverBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="ButtonPressedBrush" Color="#D0D0D0"/>
+    
+    <!-- Scroll Bar Colors -->
+    <SolidColorBrush x:Key="ScrollBarBackgroundBrush" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="ScrollBarForegroundBrush" Color="#CCCCCC"/>
+    
+    <!-- Scroll Viewer Colors -->
+    <SolidColorBrush x:Key="ScrollViewerBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ScrollViewerBorderBrush" Color="#CCCCCC"/>
+    
+    <!-- PDF Viewer Colors -->
+    <SolidColorBrush x:Key="PdfViewerBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="PdfViewerBorderBrush" Color="#CCCCCC"/>
+    
+    <!-- Thumbnail Panel Colors -->
+    <SolidColorBrush x:Key="ThumbnailPanelBackgroundBrush" Color="#F8F8F8"/>
+    <SolidColorBrush x:Key="ThumbnailPanelBorderBrush" Color="#CCCCCC"/>
+    <SolidColorBrush x:Key="ThumbnailSelectedBrush" Color="#0078D4"/>
+    <SolidColorBrush x:Key="ThumbnailHoverBrush" Color="#E0E0E0"/>
+    
+    <!-- Annotation Colors -->
+    <SolidColorBrush x:Key="HighlightYellowBrush" Color="#FFFF00"/>
+    <SolidColorBrush x:Key="HighlightGreenBrush" Color="#00FF00"/>
+    <SolidColorBrush x:Key="HighlightBlueBrush" Color="#00FFFF"/>
+    <SolidColorBrush x:Key="HighlightPinkBrush" Color="#FF00FF"/>
+    <SolidColorBrush x:Key="HighlightOrangeBrush" Color="#FFA500"/>
+    
+    <!-- Security Colors -->
+    <SolidColorBrush x:Key="RedactionBrush" Color="#000000"/>
+    <SolidColorBrush x:Key="SecurityWarningBrush" Color="#FF6B6B"/>
+    <SolidColorBrush x:Key="SecuritySuccessBrush" Color="#4CAF50"/>
+    
+    <!-- Accent Colors -->
+    <SolidColorBrush x:Key="PrimaryAccentBrush" Color="#0078D4"/>
+    <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#106EBE"/>
+    <SolidColorBrush x:Key="TertiaryAccentBrush" Color="#005A9E"/>
+    
+    <!-- Error and Warning Colors -->
+    <SolidColorBrush x:Key="ErrorBrush" Color="#D13438"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="#FF8C00"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="#0078D4"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="#107C10"/>
+    
+</ResourceDictionary>

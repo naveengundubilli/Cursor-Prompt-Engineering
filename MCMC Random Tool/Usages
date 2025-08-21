@@ -1,0 +1,54 @@
+Here are practical ways to use it (with the commands you already have):
+
+1) Check for hidden patterns / non-randomness
+
+Find biased numbers and sticky transitions with smoothed probabilities and heatmaps.
+
+python -m mcmc_random_tool.cli analyze -i your.txt --alpha 1.0 --out-prefix out/analysis
+
+
+Use the heatmap + start-prob CSVs to spot clusters (dependencies) rather than uniform noise.
+
+2) Generate likely sequences (for forecasting or prototyping)
+
+Most-likely paths from common starts + probabilistic samples that resemble your data:
+
+python -m mcmc_random_tool.cli predict -i your.txt --alpha 1.0 --length 7 -k 5 --seed 42
+
+3) Rank candidate sequences by likelihood
+
+Monte Carlo sample and surface the top-k unique sequences your model thinks are most plausible:
+
+python -m mcmc_random_tool.cli topk -i your.txt -n 1000 -k 10 -o out/topk.csv
+
+4) Quantify uncertainty (Bayesian posterior predictive)
+
+Resample entire transition matrices (Dirichlet) and rank sequences by mean posterior probability. Great when data is small/sparse.
+
+python -m mcmc_random_tool.cli posterior -i your.txt --alpha 1.0 --nsamples 1000 -k 10 -o out/posterior_top.csv
+
+5) Apply beyond numbers 1–35 (map any categorical states)
+
+Use --min-state/--max-state to change the range, or map categories → integers first. Examples:
+
+RNG quality checks (die rolls, PRNG output)
+
+User journeys / clickstreams (pages or steps → integers)
+
+IoT/sensor states (bin values then model transitions)
+
+Game/NPC behavior prototyping
+
+Bio/sequence motifs (after discretization)
+
+Tips
+
+α (smoothing): increase --alpha (e.g., 2–5) to reduce overconfident loops in tiny datasets.
+
+Reproducibility: set --seed on sampling commands.
+
+Outputs: CSVs (transition matrix, start probs) + PNGs (frequency, heatmap) for quick reporting.
+
+Important note
+
+This surfaces structure in sequences; it’s not a guarantee of future outcomes (e.g., lotteries/gambling). Use it to detect dependencies, generate plausible variants, and compare candidates, not to promise wins.

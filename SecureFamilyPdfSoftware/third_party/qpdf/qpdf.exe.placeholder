@@ -1,0 +1,26 @@
+QPDF BINARY PLACEHOLDER
+
+This is a placeholder for the qpdf.exe binary.
+
+To obtain the actual qpdf.exe binary:
+
+1. Visit the official qpdf releases: https://github.com/qpdf/qpdf/releases
+2. Download the latest Windows x64 release (e.g., qpdf-11.6.3-windows-x64.zip)
+3. Extract the qpdf.exe file from the zip archive
+4. Place qpdf.exe in this directory (third_party/qpdf/)
+5. Verify the binary by running: qpdf.exe --version
+
+The qpdf binary is used for:
+- Password protection of PDF files (AES-256 encryption)
+- Password removal from protected PDF files
+- PDF validation and integrity checks
+
+Security Notes:
+- Only download qpdf from the official GitHub releases
+- Verify the SHA256 checksum of the downloaded file
+- The binary is executed via ProcessStartInfo with sanitized parameters
+- Passwords are never logged or echoed to console output
+
+License: Apache License 2.0 (see LICENSE file in this directory)
+
+For more information, visit: https://github.com/qpdf/qpdf

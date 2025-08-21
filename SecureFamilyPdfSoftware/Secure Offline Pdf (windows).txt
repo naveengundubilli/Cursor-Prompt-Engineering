@@ -1,0 +1,219 @@
+Prompt 1 — Scaffold Solution & Repo Structure
+
+You are acting as a senior C# WPF developer.
+
+Task: Scaffold a new solution named SecurePdfEditor with:
+
+src/
+
+SecurePdfEditor/ (WPF app project)
+
+SecurePdfEditor.Core/ (class library for business logic)
+
+SecurePdfEditor.Tests/ (xUnit test project)
+
+Requirements
+
+Target .NET 8.0 for all projects.
+
+Add solution-level NuGet.config pinning to stable sources and disallowing prerelease by default (opt-in via per-PackageReference IncludePrerelease).
+
+Add Directory.Build.props enforcing: LangVersion=latest, Nullable=enable, TreatWarningsAsErrors=true, deterministic builds, and WarningsNotAsErrors for designer-generated files only.
+
+Pre-wire src/SecurePdfEditor.Core with folders: Pdf/, Security/, Utils/.
+
+Add README.md with repo overview and local build steps (including Windows-only prerequisites and offline build note).
+
+Acceptance
+
+dotnet build succeeds; solution contains the three projects; README present.
+
+Prompt 2 — PDF Viewing Adapter
+
+You are acting as a PDF rendering integrator.
+
+Task: Implement PdfViewAdapter in SecurePdfEditor.Core/Pdf that wraps PdfiumViewer for WPF.
+
+Notes
+
+Prefer a WPF-friendly package (e.g., a PdfRenderer WPF control or render to Bitmap then convert to ImageSource). Use System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap when needed.
+
+Ensure all files load from local disk only.
+
+Capabilities
+
+Load local PDFs from file path.
+
+Render current page into a WPF ImageSource for UI binding.
+
+Navigation: NextPage(), PreviousPage(), GoToPage(int index) with bounds checks.
+
+Expose properties: PageCount, CurrentPageIndex, Zoom (percentage), and IsDocumentLoaded.
+
+Dispose unmanaged/native resources deterministically (IDisposable, finalizer safe).
+
+Testing
+
+Add xUnit tests that simulate load/navigation on small fixture PDFs. Where direct PDFium mocks are impractical, wrap PDFium calls behind an interface and mock the wrapper.
+
+Acceptance
+
+A small WPF host can bind to the adapter and display pages with smooth navigation.
+
+Prompt 3 — Annotation Service
+
+You are acting as a PDF annotation engineer.
+
+Task: Define and implement IAnnotationService in SecurePdfEditor.Core/Pdf with the following API:
+
+public interface IAnnotationService
+{
+    Task HighlightTextAsync(TextRange range, Color color);
+    Task AddStickyNoteAsync(Point pagePosition, string text);
+    Task SaveAnnotationsAsync(string outputPdfPath);
+}
+
+Approach
+
+Use QuestPDF Document Operations to overlay annotations onto a new PDF export.
+
+Load each source page, render a full-page underlay from the original PDF (image or vector import depending on library capability), then draw highlight rectangles and sticky-note glyphs on an overlay layer.
+
+Persist into a new file (non-destructive) under *.annotated.pdf.
+
+Keep everything offline and embedded; no web fonts.
+
+Caveats
+
+Overlay-based annotations don’t modify original content streams; they create a visually annotated derivative. That’s acceptable here; “true redaction” is handled in Security (Prompt 4).
+
+Testing
+
+Golden-image tests: compare rasterized output of annotated pages to expected PNGs within tolerances.
+
+Prompt 4 — Security Workflow
+
+You are acting as a security engineer.
+
+Task: Create ISecurityService in SecurePdfEditor.Core/Security with:
+
+public interface ISecurityService
+{
+    Task ApplyPasswordProtectionAsync(string inputPath, string outputPath, string password);
+    Task RemovePasswordAsync(string inputPath, string outputPath, string password);
+    Task RedactTextAsync(string inputPath, string outputPath, string searchTerm);
+}
+
+Encryption/Decryption
+
+Integrate qpdf via ProcessStartInfo for password apply/remove (AES-256). Bundle qpdf binary under third_party/qpdf/ with LICENSE and SHA256. Validate exit codes and sanitize paths. Do not echo passwords to logs.
+
+Redaction (Irreversible)
+
+Implement a rasterize-and-rebuild pipeline to guarantee content removal:
+
+Use PDFium to render selected pages to high-DPI bitmaps.
+
+Paint opaque rectangles over matches of searchTerm (identify via text extraction coordinates where available; fallback to whole-page raster if extraction is not available).
+
+Rebuild a new PDF from the redacted bitmaps (no text layer) via QuestPDF.
+
+Clearly mark outputs as *.redacted.pdf. This ensures no searchable text remains.
+
+Avoid claiming qpdf performs semantic redaction by itself; use qpdf only for encryption/decryption. If later we add a content-preserving redaction engine, gate it behind feature flags and tests that verify strings are absent from content streams.
+
+Testing
+
+Password roundtrip tests (open → encrypt → decrypt → open).
+
+Redaction tests: verify that searchTerm is not present in text extraction from the output and not found by string search; verify visual blocks exist on expected coordinates.
+
+Prompt 5 — WPF UI Integration
+
+You are acting as a WPF MVVM engineer.
+
+Task: Bind PdfViewAdapter into MainWindow.xaml using MVVM:
+
+Commands: OpenFileCommand, NextPageCommand, PrevPageCommand, GoToPageCommand, ZoomInCommand, ZoomOutCommand.
+
+Toolbar: Open file; page navigation; zoom controls.
+
+Annotation toolbar: highlight and sticky note tools, committing via IAnnotationService.
+
+Security menu: password protect, remove password, and redaction by term.
+
+Patterns: MainViewModel implements INotifyPropertyChanged, uses ICommand; DI container config (e.g., Microsoft.Extensions.DependencyInjection) in App startup.
+
+Acceptance
+
+UI opens a local PDF, navigates pages, applies a highlight and sticky note, and exports an annotated copy. Security menu encrypts/decrypts and performs a demo redaction.
+
+Prompt 6 — Offline Build & Test Automation
+
+You are acting as a build engineer.
+
+Task: Provide Windows PowerShell scripts under build/scripts/:
+
+Restore-FromLocal.ps1: Restores NuGet packages from local cache only; fails if network is required. Optionally supports a local NuGet folder feed.
+
+Build-And-Test.ps1: Builds Debug/Release and runs unit tests.
+
+Package-Dist.ps1: Copies signed binaries to /dist, adds README.md and LICENSE, includes third_party/ with checksums.
+
+Acceptance
+
+After first online restore (to warm the cache), subsequent runs succeed offline. Scripts emit clear logs and non-zero exit codes on failure.
+
+Part 2 — Quick‑Access Index (Compact)
+
+1 — Scaffold Solution & Repo Structure
+Scaffold .NET 8 WPF solution SecurePdfEditor with:
+
+src/SecurePdfEditor (WPF)
+
+src/SecurePdfEditor.Core (class lib)
+
+src/SecurePdfEditor.Tests (xUnit)
+
+NuGet.config, Directory.Build.props (LangVersion latest, Nullable enable, TreatWarningsAsErrors true)
+
+README.md with build notes
+
+2 — PDF Viewing Adapter
+Implement PdfViewAdapter in Core/Pdf wrapping PdfiumViewer:
+
+Load local PDF → WPF ImageSource
+
+Navigation: Next, Prev, GoTo(int)
+
+Dispose unmanaged resources
+
+xUnit tests via wrapper interfaces
+
+3 — Annotation Service
+IAnnotationService:
+
+HighlightText(range, color)
+
+AddStickyNote(position, text)
+
+SaveAnnotations() Use QuestPDF overlays → export new PDF (offline)
+
+4 — Security Workflow
+ISecurityService:
+
+ApplyPasswordProtection(path, pw)
+
+RemovePassword(path, pw)
+
+RedactText(searchTerm) via rasterize-and-rebuild (irreversible). Use qpdf only for passwords.
+
+5 — WPF UI Integration
+Bind adapter to MainWindow.xaml:
+
+Open file, page navigation, annotation toolbar, security menu
+
+MVVM: MainViewModel, DataTemplates, Commands
+
+6 — Offline Build & Test Automation
+PowerShell scripts to restore from local cache, build+test, and package to /dist; confirm offline run after cache warm.

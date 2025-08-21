@@ -1,0 +1,2 @@
+[console_scripts]
+mcmc-random-tool = mcmc_random_tool.cli:main
