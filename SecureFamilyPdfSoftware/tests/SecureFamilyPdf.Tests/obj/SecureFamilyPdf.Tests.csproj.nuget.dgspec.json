@@ -35,7 +35,6 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
           "warnAsError": [
             "NU1605"
           ]
@@ -59,11 +58,11 @@
             },
             "Microsoft.Extensions.DependencyInjection.Abstractions": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Logging.Abstractions": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "PdfiumViewer": {
               "target": "Package",
@@ -71,19 +70,23 @@
             },
             "PdfiumViewer.Native.x86_64.v8-xfa": {
               "target": "Package",
-              "version": "[8.0.270, )"
+              "version": "[2017.11.2.204, )"
             },
             "QuestPDF": {
               "target": "Package",
               "version": "[2023.12.6, )"
             },
-            "System.Security.Cryptography.ProtectedData": {
+            "System.Drawing.Common": {
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "System.Security.Cryptography.ProtectedData": {
+              "target": "Package",
+              "version": "[9.0.8, )"
+            },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -158,7 +161,6 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
           "warnAsError": [
             "NU1605"
           ]
@@ -182,31 +184,31 @@
             },
             "Microsoft.Extensions.Configuration": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Configuration.Json": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Hosting": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Logging": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Logging.Console": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Logging.Debug": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
@@ -214,21 +216,13 @@
               "version": "[8.0.19, )",
               "autoReferenced": true
             },
-            "Microsoft.Windows.SDK.BuildTools": {
-              "target": "Package",
-              "version": "[10.0.22621.2428, )"
-            },
-            "Microsoft.WindowsAppSDK": {
-              "target": "Package",
-              "version": "[1.4.231115000, )"
-            },
             "Microsoft.Xaml.Behaviors.Wpf": {
               "target": "Package",
-              "version": "[1.1.39, )"
+              "version": "[1.1.135, )"
             },
             "System.Security.Cryptography.ProtectedData": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             }
           },
           "imports": [
@@ -327,7 +321,6 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
           "warnAsError": [
             "NU1605"
           ]
@@ -353,15 +346,11 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.Extensions.Logging.Testing": {
+            "Microsoft.Extensions.Logging": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.NET.Test.Sdk": {
-              "target": "Package",
-              "version": "[17.8.0, )"
-            },
-            "Microsoft.VisualStudio.TestTools.UnitTesting": {
               "target": "Package",
               "version": "[17.8.0, )"
             },

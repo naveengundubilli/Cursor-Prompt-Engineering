@@ -1,0 +1,10 @@
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\x64\pdfium.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\Resources\app.ico
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\D3DCompiler_47_cor3.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\PenImc_cor3.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\PresentationNative_cor3.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\vcruntime140_cor3.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\wpfgfx_cor3.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\libHarfBuzzSharp.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\libSkiaSharp.dll
+C:\Cursor\Cursor-Prompt-Engineering\SecureFamilyPdfSoftware\dist\SecureFamilyPdf-Fixed\SecureFamilyPdf.exe

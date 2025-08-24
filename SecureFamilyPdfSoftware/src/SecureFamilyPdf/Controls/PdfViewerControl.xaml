@@ -1,0 +1,20 @@
+<UserControl x:Class="SecureFamilyPdf.Controls.PdfViewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <ScrollViewer x:Name="PdfScrollViewer" 
+                      HorizontalScrollBarVisibility="Auto" 
+                      VerticalScrollBarVisibility="Auto">
+            <Border Background="White" 
+                    BorderBrush="Gray" 
+                    BorderThickness="1" 
+                    Margin="10">
+                <TextBlock x:Name="PdfContent" 
+                           Text="PDF Viewer - No document loaded" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           FontSize="16"/>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

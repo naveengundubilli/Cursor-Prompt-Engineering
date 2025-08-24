@@ -116,7 +116,7 @@ function Restore-Packages {
 }
 
 # Function to build solution
-function Build-Solution {
+function Invoke-SolutionBuild {
     Write-ColorOutput "Building solution in $Configuration configuration..." "Yellow"
     
     try {
@@ -236,7 +236,7 @@ try {
     Restore-Packages
     
     # Build solution
-    Build-Solution
+    Invoke-SolutionBuild
     
     # Run tests (unless skipped)
     Invoke-Tests

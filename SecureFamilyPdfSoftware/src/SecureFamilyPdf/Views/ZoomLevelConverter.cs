@@ -1,10 +1,11 @@
+using System;
 using System.Globalization;
 using System.Windows.Data;
 
 namespace SecureFamilyPdf.Views;
 
 /// <summary>
-/// Converts zoom level (as decimal) to percentage string for display.
+/// Converts zoom level (double) to display string (e.g., "100%", "150%")
 /// </summary>
 public class ZoomLevelConverter : IValueConverter
 {
@@ -20,7 +21,7 @@ public class ZoomLevelConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is string zoomString && zoomString.EndsWith("%"))
+        if (value is string zoomString && zoomString.EndsWith('%'))
         {
             if (double.TryParse(zoomString.TrimEnd('%'), out double percentage))
             {

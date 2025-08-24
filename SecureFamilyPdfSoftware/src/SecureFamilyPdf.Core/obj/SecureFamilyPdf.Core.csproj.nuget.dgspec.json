@@ -35,7 +35,9 @@
           }
         },
         "warningProperties": {
-          "allWarningsAsErrors": true,
+          "noWarn": [
+            "NU1701"
+          ],
           "warnAsError": [
             "NU1605"
           ]
@@ -59,11 +61,11 @@
             },
             "Microsoft.Extensions.DependencyInjection.Abstractions": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "Microsoft.Extensions.Logging.Abstractions": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.8, )"
             },
             "PdfiumViewer": {
               "target": "Package",
@@ -71,19 +73,23 @@
             },
             "PdfiumViewer.Native.x86_64.v8-xfa": {
               "target": "Package",
-              "version": "[8.0.270, )"
+              "version": "[2017.11.2.204, )"
             },
             "QuestPDF": {
               "target": "Package",
               "version": "[2023.12.6, )"
             },
-            "System.Security.Cryptography.ProtectedData": {
+            "System.Drawing.Common": {
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "System.Security.Cryptography.ProtectedData": {
+              "target": "Package",
+              "version": "[9.0.8, )"
+            },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[8.0.0, )"
+              "version": "[9.0.0, )"
             }
           },
           "imports": [

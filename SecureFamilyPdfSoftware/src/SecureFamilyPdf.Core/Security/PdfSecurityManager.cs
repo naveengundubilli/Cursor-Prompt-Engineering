@@ -1,5 +1,6 @@
 using System.Security;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace SecureFamilyPdf.Core.Security;
 
@@ -23,7 +24,7 @@ public sealed class PdfSecurityManager
     /// </summary>
     /// <param name="document">The PDF document to secure</param>
     /// <returns>True if security was applied successfully</returns>
-    public bool ApplySecuritySettings(PdfDocument document)
+    public bool ApplySecuritySettings(PdfiumViewer.PdfDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
 
@@ -124,28 +125,28 @@ public sealed class PdfSecurityManager
         return result;
     }
 
-    private void DisableJavaScript(PdfDocument document)
+    private void DisableJavaScript(PdfiumViewer.PdfDocument document)
     {
         // Implementation will depend on the specific PDF library used
         // This is a placeholder for the actual implementation
         _logger.LogDebug("JavaScript disabled for PDF document");
     }
 
-    private void DisableExternalLinks(PdfDocument document)
+    private void DisableExternalLinks(PdfiumViewer.PdfDocument document)
     {
         // Implementation will depend on the specific PDF library used
         // This is a placeholder for the actual implementation
         _logger.LogDebug("External links disabled for PDF document");
     }
 
-    private void DisableEmbeddedFiles(PdfDocument document)
+    private void DisableEmbeddedFiles(PdfiumViewer.PdfDocument document)
     {
         // Implementation will depend on the specific PDF library used
         // This is a placeholder for the actual implementation
         _logger.LogDebug("Embedded files disabled for PDF document");
     }
 
-    private void DisableFormSubmission(PdfDocument document)
+    private void DisableFormSubmission(PdfiumViewer.PdfDocument document)
     {
         // Implementation will depend on the specific PDF library used
         // This is a placeholder for the actual implementation

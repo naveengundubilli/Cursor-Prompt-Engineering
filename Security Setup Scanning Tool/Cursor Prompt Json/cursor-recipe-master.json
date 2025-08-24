@@ -1,0 +1,522 @@
+{
+  "meta": {
+    "id": "cursor-recipe-master",
+    "name": "Security Orchestration Platform - Build Plan",
+    "version": "1.0.0",
+    "created": "2025-08-22",
+    "description": "Milestones, MVPs and prompt packs per module to bootstrap implementation in Cursor."
+  },
+  "modules": [
+    {
+      "meta": {
+        "id": "backend-core",
+        "name": "Backend Core",
+        "version": "1.0.0",
+        "created": "2025-08-22",
+        "description": "Spring Boot engine providing REST APIs, persistence, and orchestration.",
+        "tech_stack": [
+          "Java 21",
+          "Spring Boot",
+          "PostgreSQL",
+          "Liquibase",
+          "Kafka (optional local)"
+        ]
+      },
+      "global_constraints": [
+        "Use only open-source libraries with permissive licenses.",
+        "Prefer configuration over code; externalize credentials and secrets.",
+        "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+        "All code must be linted, formatted, and covered by unit tests where sensible.",
+        "Implement .editorconfig and pre-commit hooks (where applicable).",
+        "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+        "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+        "No plaintext secrets; use environment variables and .env.example only.",
+        "Write README.md with setup, run, and test commands.",
+        "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+      ],
+      "milestones": [
+        {
+          "id": "mvp-0",
+          "title": "Scaffold & Baseline",
+          "acceptance": [
+            "Project builds locally on Windows via PowerShell script.",
+            "Unit test scaffold runs and passes (empty test)."
+          ]
+        },
+        {
+          "id": "mvp-1",
+          "title": "Core Feature MVP",
+          "acceptance": [
+            "Primary happy-path scenario works end-to-end.",
+            "OpenAPI contract generated and served at /swagger or /api-docs."
+          ]
+        },
+        {
+          "id": "mvp-2",
+          "title": "Hardening & CI",
+          "acceptance": [
+            "Linting, tests in CI; SBOM generated; basic security scans pass."
+          ]
+        },
+        {
+          "id": "mvp-3",
+          "title": "Docs & Examples",
+          "acceptance": [
+            "README includes examples, troubleshooting, limitations."
+          ]
+        },
+        {
+          "id": "hardening",
+          "title": "Security hardening",
+          "acceptance": [
+            "JWT rotation and token TTL enforced",
+            "RBAC verified via tests"
+          ]
+        }
+      ],
+      "dependencies": [],
+      "prompts": [
+        {
+          "id": "scaffold-core",
+          "title": "Scaffold Spring Boot Core",
+          "prompt": "Act as a senior Spring Boot engineer.\nCreate project 'secplatform-core':\n- Modules: core-api, core-service, core-db, core-security\n- Gradle Kotlin builds; Java 21; Spotless; Detekt/Checkstyle\n- Spring Web, Security (JWT), Data JPA, Validation, Actuator\n- OpenAPI via springdoc-openapi at /api-docs and /swagger-ui\n- Liquibase for schema; PostgreSQL driver\n- Package base: com.secplatform.core\nGenerate:\n- Controllers: ScanController, FindingController, AssetController\n- Entities: Asset(id, type, owner, criticality, env), ScanJob(id, repoUrl, type, status, commitHash, createdAt), Finding(id, assetId, ruleId, severity, score, status, location, evidenceRef)\n- Services and Repos with interfaces and impl stubs\n- Security: JWT filter, RBAC roles (ADMIN, SECENG, DEV, VIEWER)\n- Health endpoints and /ready, /live\n- PowerShell scripts: scripts\\build.ps1, scripts\\run.ps1 (no Docker) reading .env\n- README.md with Windows-first instructions",
+          "acceptance": [
+            "Project builds with `./gradlew build` and `scripts\\build.ps1`.",
+            "OpenAPI UI reachable; endpoints return 200 with stub data."
+          ]
+        },
+        {
+          "id": "kafka-integration",
+          "title": "Add Kafka Job Orchestration",
+          "prompt": "Add Kafka integration for topics: scan.requests, scan.results, scan.errors.\n- Producer to publish ScanRequest(jobId, repoUrl, type, tool) to scan.requests\n- Consumer to receive ScanResult(jobId, findings[], metrics) on scan.results\n- Persist normalized results to Postgres; store raw JSON to object store path on disk (for dev)\n- Add idempotency: ignore duplicate ScanResults for same (jobId, tool) if unchanged\n- Extend README with local Kafka-less mode: in-memory queue fallback",
+          "acceptance": [
+            "Publishing/consuming messages works in integration tests (no external broker in local mode)."
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "scripts/build.ps1",
+          "contents": "Write-Host 'Building'; ./gradlew clean build"
+        },
+        {
+          "path": "scripts/run.ps1",
+          "contents": "Write-Host 'Running'; java -jar build/libs/secplatform-core.jar"
+        },
+        {
+          "path": ".env.example",
+          "contents": "SPRING_PROFILES_ACTIVE=dev\nDB_URL=jdbc:postgresql://localhost:5432/secplatform\nDB_USER=postgres\nDB_PASS=postgres\nJWT_SECRET=change_me"
+        }
+      ],
+      "commands": [
+        {
+          "name": "Build",
+          "run": "powershell -ExecutionPolicy Bypass -File scripts\\build.ps1"
+        },
+        {
+          "name": "Run",
+          "run": "powershell -ExecutionPolicy Bypass -File scripts\\run.ps1"
+        }
+      ]
+    },
+    {
+      "meta": {
+        "id": "sast-worker",
+        "name": "SAST Worker",
+        "version": "1.0.0",
+        "created": "2025-08-22",
+        "description": "Worker that runs Semgrep and OWASP Dependency-Check and publishes normalized results.",
+        "tech_stack": [
+          "Java 21",
+          "Spring Boot",
+          "Semgrep",
+          "OWASP Dependency-Check"
+        ]
+      },
+      "global_constraints": [
+        "Use only open-source libraries with permissive licenses.",
+        "Prefer configuration over code; externalize credentials and secrets.",
+        "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+        "All code must be linted, formatted, and covered by unit tests where sensible.",
+        "Implement .editorconfig and pre-commit hooks (where applicable).",
+        "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+        "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+        "No plaintext secrets; use environment variables and .env.example only.",
+        "Write README.md with setup, run, and test commands.",
+        "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+      ],
+      "milestones": [
+        {
+          "id": "mvp-0",
+          "title": "Scaffold & Baseline",
+          "acceptance": [
+            "Project builds locally on Windows via PowerShell script.",
+            "Unit test scaffold runs and passes (empty test)."
+          ]
+        },
+        {
+          "id": "mvp-1",
+          "title": "Core Feature MVP",
+          "acceptance": [
+            "Primary happy-path scenario works end-to-end.",
+            "OpenAPI contract generated and served at /swagger or /api-docs."
+          ]
+        },
+        {
+          "id": "mvp-2",
+          "title": "Hardening & CI",
+          "acceptance": [
+            "Linting, tests in CI; SBOM generated; basic security scans pass."
+          ]
+        },
+        {
+          "id": "mvp-3",
+          "title": "Docs & Examples",
+          "acceptance": [
+            "README includes examples, troubleshooting, limitations."
+          ]
+        }
+      ],
+      "dependencies": [
+        "backend-core"
+      ],
+      "prompts": [
+        {
+          "id": "scaffold-sast",
+          "title": "Scaffold SAST Worker",
+          "prompt": "Create a Spring Boot worker 'secplatform-sast' with:\n- Kafka consumer: scan.requests filtered by type=SAST\n- Execute Semgrep and OWASP Dependency-Check\n- For Windows local dev: download tools on first run to .tools\\semgrep and .tools\\dependency-check\n- Run scanners on a cloned repo (use JGit or shell if available); allow local path fallback\n- Parse JSON/XML outputs into normalized Finding objects (map ruleId, severity, file, line, snippet)\n- Publish ScanResult to scan.results with metrics (duration, tool versions)\n- PowerShell scripts to run without Docker\n- Unit tests for parsers (use sample fixtures)",
+          "acceptance": [
+            "Given a small test repo, worker emits findings to scan.results.",
+            "Parsers extract ruleId, severity, file/line."
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "scripts/run-sast.ps1",
+          "contents": "Write-Host 'Run SAST worker'"
+        },
+        {
+          "path": ".env.example",
+          "contents": "BROKER_DISABLED=true\nTOOLS_DIR=.tools"
+        }
+      ],
+      "commands": [
+        {
+          "name": "Run (local no-broker)",
+          "run": "powershell -ExecutionPolicy Bypass -File scripts\\run-sast.ps1"
+        }
+      ]
+    },
+    {
+      "meta": {
+        "id": "iac-worker",
+        "name": "IaC Worker",
+        "version": "1.0.0",
+        "created": "2025-08-22",
+        "description": "Worker that evaluates Terraform/K8s configuration via Checkov and Trivy config.",
+        "tech_stack": [
+          "Java 21",
+          "Spring Boot",
+          "Checkov",
+          "Trivy"
+        ]
+      },
+      "global_constraints": [
+        "Use only open-source libraries with permissive licenses.",
+        "Prefer configuration over code; externalize credentials and secrets.",
+        "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+        "All code must be linted, formatted, and covered by unit tests where sensible.",
+        "Implement .editorconfig and pre-commit hooks (where applicable).",
+        "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+        "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+        "No plaintext secrets; use environment variables and .env.example only.",
+        "Write README.md with setup, run, and test commands.",
+        "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+      ],
+      "milestones": [
+        {
+          "id": "mvp-0",
+          "title": "Scaffold & Baseline",
+          "acceptance": [
+            "Project builds locally on Windows via PowerShell script.",
+            "Unit test scaffold runs and passes (empty test)."
+          ]
+        },
+        {
+          "id": "mvp-1",
+          "title": "Core Feature MVP",
+          "acceptance": [
+            "Primary happy-path scenario works end-to-end.",
+            "OpenAPI contract generated and served at /swagger or /api-docs."
+          ]
+        },
+        {
+          "id": "mvp-2",
+          "title": "Hardening & CI",
+          "acceptance": [
+            "Linting, tests in CI; SBOM generated; basic security scans pass."
+          ]
+        },
+        {
+          "id": "mvp-3",
+          "title": "Docs & Examples",
+          "acceptance": [
+            "README includes examples, troubleshooting, limitations."
+          ]
+        }
+      ],
+      "dependencies": [
+        "backend-core"
+      ],
+      "prompts": [
+        {
+          "id": "scaffold-iac",
+          "title": "Scaffold IaC Worker",
+          "prompt": "Create Spring Boot worker 'secplatform-iac' to process scan.requests with type=IAC.\n- Run Checkov and Trivy config against a specified directory\n- Parse JSON outputs into Finding objects\n- Publish results to scan.results\n- Support local path scanning without network\n- Include fixtures and parser tests",
+          "acceptance": [
+            "Runs checkov -d <path> and trivy config <path> via PowerShell on Windows.",
+            "Findings normalized with ruleId, resource, severity, remediation where present."
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "scripts/run-iac.ps1",
+          "contents": "Write-Host 'Run IaC worker'"
+        }
+      ],
+      "commands": [
+        {
+          "name": "Run (local)",
+          "run": "powershell -ExecutionPolicy Bypass -File scripts\\run-iac.ps1"
+        }
+      ]
+    },
+    {
+      "meta": {
+        "id": "frontend-dashboard",
+        "name": "Frontend Dashboard",
+        "version": "1.0.0",
+        "created": "2025-08-22",
+        "description": "React SPA for risk overview, findings triage, and scan management.",
+        "tech_stack": [
+          "React",
+          "TypeScript",
+          "Vite",
+          "React Query",
+          "Chart.js",
+          "D3"
+        ]
+      },
+      "global_constraints": [
+        "Use only open-source libraries with permissive licenses.",
+        "Prefer configuration over code; externalize credentials and secrets.",
+        "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+        "All code must be linted, formatted, and covered by unit tests where sensible.",
+        "Implement .editorconfig and pre-commit hooks (where applicable).",
+        "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+        "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+        "No plaintext secrets; use environment variables and .env.example only.",
+        "Write README.md with setup, run, and test commands.",
+        "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+      ],
+      "milestones": [
+        {
+          "id": "mvp-0",
+          "title": "Scaffold & Baseline",
+          "acceptance": [
+            "Project builds locally on Windows via PowerShell script.",
+            "Unit test scaffold runs and passes (empty test)."
+          ]
+        },
+        {
+          "id": "mvp-1",
+          "title": "Core Feature MVP",
+          "acceptance": [
+            "Primary happy-path scenario works end-to-end.",
+            "OpenAPI contract generated and served at /swagger or /api-docs."
+          ]
+        },
+        {
+          "id": "mvp-2",
+          "title": "Hardening & CI",
+          "acceptance": [
+            "Linting, tests in CI; SBOM generated; basic security scans pass."
+          ]
+        },
+        {
+          "id": "mvp-3",
+          "title": "Docs & Examples",
+          "acceptance": [
+            "README includes examples, troubleshooting, limitations."
+          ]
+        }
+      ],
+      "dependencies": [
+        "backend-core"
+      ],
+      "prompts": [
+        {
+          "id": "scaffold-frontend",
+          "title": "Scaffold React Dashboard",
+          "prompt": "Act as a senior React engineer.\nScaffold 'secplatform-dashboard' using Vite + React + TypeScript.\n- Routing: / (RiskOverview), /findings, /assets, /scans\n- Components: RiskOverview, FindingsTable, AssetGraph(D3), ScanRequestForm\n- API client using React Query; base URL from env\n- Auth: JWT stored in memory; refresh flow via interceptor\n- Charts: Chart.js for overview; D3 force graph for attack paths\n- Accessibility: keyboard nav, aria labels; responsive layout\n- Build scripts for Windows (PowerShell) and standard npm scripts",
+          "acceptance": [
+            "Build succeeds; pages render with mocked API data.",
+            "FindingsTable supports filter by severity and status."
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": "scripts/run.ps1",
+          "contents": "npm install; npm run dev"
+        }
+      ],
+      "commands": [
+        {
+          "name": "Dev (Windows)",
+          "run": "powershell -ExecutionPolicy Bypass -File scripts\\run.ps1"
+        }
+      ]
+    },
+    {
+      "meta": {
+        "id": "devops-pipeline",
+        "name": "DevOps Pipeline",
+        "version": "1.0.0",
+        "created": "2025-08-22",
+        "description": "CI/CD with security gates and Terraform IaC for cloud deployment.",
+        "tech_stack": [
+          "GitHub Actions",
+          "Syft",
+          "Trivy",
+          "Terraform"
+        ]
+      },
+      "global_constraints": [
+        "Use only open-source libraries with permissive licenses.",
+        "Prefer configuration over code; externalize credentials and secrets.",
+        "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+        "All code must be linted, formatted, and covered by unit tests where sensible.",
+        "Implement .editorconfig and pre-commit hooks (where applicable).",
+        "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+        "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+        "No plaintext secrets; use environment variables and .env.example only.",
+        "Write README.md with setup, run, and test commands.",
+        "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+      ],
+      "milestones": [
+        {
+          "id": "mvp-0",
+          "title": "Scaffold & Baseline",
+          "acceptance": [
+            "Project builds locally on Windows via PowerShell script.",
+            "Unit test scaffold runs and passes (empty test)."
+          ]
+        },
+        {
+          "id": "mvp-1",
+          "title": "Core Feature MVP",
+          "acceptance": [
+            "Primary happy-path scenario works end-to-end.",
+            "OpenAPI contract generated and served at /swagger or /api-docs."
+          ]
+        },
+        {
+          "id": "mvp-2",
+          "title": "Hardening & CI",
+          "acceptance": [
+            "Linting, tests in CI; SBOM generated; basic security scans pass."
+          ]
+        },
+        {
+          "id": "mvp-3",
+          "title": "Docs & Examples",
+          "acceptance": [
+            "README includes examples, troubleshooting, limitations."
+          ]
+        }
+      ],
+      "dependencies": [
+        "backend-core",
+        "sast-worker",
+        "iac-worker",
+        "frontend-dashboard"
+      ],
+      "prompts": [
+        {
+          "id": "github-actions-ci",
+          "title": "GitHub Actions CI with Security Gates",
+          "prompt": "Create .github/workflows/ci.yml to run for backend, workers, and frontend:\n- Triggers: PR and push to main\n- Jobs: lint, test, build\n- Generate SBOM with anchore/syft for each service\n- Run Trivy to scan built images or file system (frontend as fs)\n- Upload artifacts; cache deps\n- On release tags: sign artifacts with cosign (keyless allowed), attach SBOM",
+          "acceptance": [
+            "CI runs on PR; artifacts available; SBOM uploaded.",
+            "Security scans run and results visible in logs."
+          ]
+        },
+        {
+          "id": "terraform-eks",
+          "title": "Terraform for AWS EKS + RDS + MSK (Optional)",
+          "prompt": "Provide Terraform modules to provision:\n- EKS cluster (managed node groups), namespace for platform\n- RDS PostgreSQL (encrypted, minimal privs), security groups\n- MSK (Kafka) optional; toggle via variable\n- S3 bucket for raw artifacts (versioned, SSE-S3/KMS)\nInclude example tfvars and PowerShell helper scripts to plan/apply from Windows.",
+          "acceptance": [
+            "terraform plan completes without errors; outputs include kubeconfig path and connection strings."
+          ]
+        }
+      ],
+      "files": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "contents": "# to be generated by Cursor per prompt"
+        },
+        {
+          "path": "infra/README.md",
+          "contents": "Terraform modules for AWS EKS/RDS/MSK/S3."
+        }
+      ],
+      "commands": [
+        {
+          "name": "CI Lint (local)",
+          "run": "powershell -ExecutionPolicy Bypass -Command \"echo 'lint placeholder'\""
+        }
+      ]
+    }
+  ],
+  "global_constraints": [
+    "Use only open-source libraries with permissive licenses.",
+    "Prefer configuration over code; externalize credentials and secrets.",
+    "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+    "All code must be linted, formatted, and covered by unit tests where sensible.",
+    "Implement .editorconfig and pre-commit hooks (where applicable).",
+    "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+    "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+    "No plaintext secrets; use environment variables and .env.example only.",
+    "Write README.md with setup, run, and test commands.",
+    "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+  ],
+  "roadmap": [
+    {
+      "phase": "MVP",
+      "modules": [
+        "backend-core",
+        "sast-worker",
+        "iac-worker",
+        "frontend-dashboard",
+        "devops-pipeline"
+      ]
+    },
+    {
+      "phase": "Phase 2",
+      "modules": [
+        "devops-pipeline (terraform-eks)",
+        "add: sbom/image policies in backend"
+      ]
+    },
+    {
+      "phase": "Phase 3",
+      "modules": [
+        "cspm/kspm worker (future)",
+        "admission control"
+      ]
+    }
+  ]
+}

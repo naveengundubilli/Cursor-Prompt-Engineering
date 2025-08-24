@@ -75,7 +75,7 @@ function Test-Prerequisites {
 }
 
 # Function to build the solution
-function Build-Solution {
+function Invoke-SolutionBuild {
     Write-ColorOutput "Building solution in $Configuration configuration..." "Yellow"
     
     try {
@@ -235,7 +235,7 @@ function Copy-ThirdPartyDependencies {
             Write-ColorOutput "✓ Third-party dependencies copied" "Green"
             
             # Generate checksums for third-party files
-            Generate-ThirdPartyChecksums $thirdPartyDest
+            New-ThirdPartyChecksums $thirdPartyDest
         }
         else {
             Write-ColorOutput "⚠ Third-party directory not found: $thirdPartyDir" "Yellow"
@@ -247,8 +247,8 @@ function Copy-ThirdPartyDependencies {
     }
 }
 
-# Function to generate checksums for third-party files
-function Generate-ThirdPartyChecksums {
+# Function to create checksums for third-party files
+function New-ThirdPartyChecksums {
     param([string]$ThirdPartyPath)
     
     Write-ColorOutput "Generating checksums for third-party files..." "Yellow"
@@ -353,7 +353,7 @@ try {
     Test-Prerequisites
     
     # Build the solution
-    Build-Solution
+    Invoke-SolutionBuild
     
     # Publish the application
     Publish-Application

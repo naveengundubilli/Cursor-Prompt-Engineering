@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "id": "backend-core",
+    "name": "Backend Core",
+    "version": "1.0.0",
+    "created": "2025-08-22",
+    "description": "Spring Boot engine providing REST APIs, persistence, and orchestration.",
+    "tech_stack": [
+      "Java 21",
+      "Spring Boot",
+      "PostgreSQL",
+      "Liquibase",
+      "Kafka (optional local)"
+    ]
+  },
+  "global_constraints": [
+    "Use only open-source libraries with permissive licenses.",
+    "Prefer configuration over code; externalize credentials and secrets.",
+    "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+    "All code must be linted, formatted, and covered by unit tests where sensible.",
+    "Implement .editorconfig and pre-commit hooks (where applicable).",
+    "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+    "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+    "No plaintext secrets; use environment variables and .env.example only.",
+    "Write README.md with setup, run, and test commands.",
+    "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+  ],
+  "milestones": [
+    {
+      "id": "mvp-0",
+      "title": "Scaffold & Baseline",
+      "acceptance": [
+        "Project builds locally on Windows via PowerShell script.",
+        "Unit test scaffold runs and passes (empty test)."
+      ]
+    },
+    {
+      "id": "mvp-1",
+      "title": "Core Feature MVP",
+      "acceptance": [
+        "Primary happy-path scenario works end-to-end.",
+        "OpenAPI contract generated and served at /swagger or /api-docs."
+      ]
+    },
+    {
+      "id": "mvp-2",
+      "title": "Hardening & CI",
+      "acceptance": [
+        "Linting, tests in CI; SBOM generated; basic security scans pass."
+      ]
+    },
+    {
+      "id": "mvp-3",
+      "title": "Docs & Examples",
+      "acceptance": [
+        "README includes examples, troubleshooting, limitations."
+      ]
+    },
+    {
+      "id": "hardening",
+      "title": "Security hardening",
+      "acceptance": [
+        "JWT rotation and token TTL enforced",
+        "RBAC verified via tests"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "prompts": [
+    {
+      "id": "scaffold-core",
+      "title": "Scaffold Spring Boot Core",
+      "prompt": "Act as a senior Spring Boot engineer.\nCreate project 'secplatform-core':\n- Modules: core-api, core-service, core-db, core-security\n- Gradle Kotlin builds; Java 21; Spotless; Detekt/Checkstyle\n- Spring Web, Security (JWT), Data JPA, Validation, Actuator\n- OpenAPI via springdoc-openapi at /api-docs and /swagger-ui\n- Liquibase for schema; PostgreSQL driver\n- Package base: com.secplatform.core\nGenerate:\n- Controllers: ScanController, FindingController, AssetController\n- Entities: Asset(id, type, owner, criticality, env), ScanJob(id, repoUrl, type, status, commitHash, createdAt), Finding(id, assetId, ruleId, severity, score, status, location, evidenceRef)\n- Services and Repos with interfaces and impl stubs\n- Security: JWT filter, RBAC roles (ADMIN, SECENG, DEV, VIEWER)\n- Health endpoints and /ready, /live\n- PowerShell scripts: scripts\\build.ps1, scripts\\run.ps1 (no Docker) reading .env\n- README.md with Windows-first instructions",
+      "acceptance": [
+        "Project builds with `./gradlew build` and `scripts\\build.ps1`.",
+        "OpenAPI UI reachable; endpoints return 200 with stub data."
+      ]
+    },
+    {
+      "id": "kafka-integration",
+      "title": "Add Kafka Job Orchestration",
+      "prompt": "Add Kafka integration for topics: scan.requests, scan.results, scan.errors.\n- Producer to publish ScanRequest(jobId, repoUrl, type, tool) to scan.requests\n- Consumer to receive ScanResult(jobId, findings[], metrics) on scan.results\n- Persist normalized results to Postgres; store raw JSON to object store path on disk (for dev)\n- Add idempotency: ignore duplicate ScanResults for same (jobId, tool) if unchanged\n- Extend README with local Kafka-less mode: in-memory queue fallback",
+      "acceptance": [
+        "Publishing/consuming messages works in integration tests (no external broker in local mode)."
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "scripts/build.ps1",
+      "contents": "Write-Host 'Building'; ./gradlew clean build"
+    },
+    {
+      "path": "scripts/run.ps1",
+      "contents": "Write-Host 'Running'; java -jar build/libs/secplatform-core.jar"
+    },
+    {
+      "path": ".env.example",
+      "contents": "SPRING_PROFILES_ACTIVE=dev\nDB_URL=jdbc:postgresql://localhost:5432/secplatform\nDB_USER=postgres\nDB_PASS=postgres\nJWT_SECRET=change_me"
+    }
+  ],
+  "commands": [
+    {
+      "name": "Build",
+      "run": "powershell -ExecutionPolicy Bypass -File scripts\\build.ps1"
+    },
+    {
+      "name": "Run",
+      "run": "powershell -ExecutionPolicy Bypass -File scripts\\run.ps1"
+    }
+  ]
+}

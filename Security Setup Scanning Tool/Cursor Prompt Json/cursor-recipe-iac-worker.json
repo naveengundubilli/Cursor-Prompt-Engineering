@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "id": "iac-worker",
+    "name": "IaC Worker",
+    "version": "1.0.0",
+    "created": "2025-08-22",
+    "description": "Worker that evaluates Terraform/K8s configuration via Checkov and Trivy config.",
+    "tech_stack": [
+      "Java 21",
+      "Spring Boot",
+      "Checkov",
+      "Trivy"
+    ]
+  },
+  "global_constraints": [
+    "Use only open-source libraries with permissive licenses.",
+    "Prefer configuration over code; externalize credentials and secrets.",
+    "Must run on Windows without Docker for local dev (provide PowerShell scripts); containerized path optional.",
+    "All code must be linted, formatted, and covered by unit tests where sensible.",
+    "Implement .editorconfig and pre-commit hooks (where applicable).",
+    "Generate SBOM (Syft) and sign images/artifacts (Cosign) in CI (optional for local).",
+    "All services expose /health and /ready endpoints. Use OpenAPI for REST.",
+    "No plaintext secrets; use environment variables and .env.example only.",
+    "Write README.md with setup, run, and test commands.",
+    "Add telemetry hooks (OpenTelemetry) but keep them optional via env flags."
+  ],
+  "milestones": [
+    {
+      "id": "mvp-0",
+      "title": "Scaffold & Baseline",
+      "acceptance": [
+        "Project builds locally on Windows via PowerShell script.",
+        "Unit test scaffold runs and passes (empty test)."
+      ]
+    },
+    {
+      "id": "mvp-1",
+      "title": "Core Feature MVP",
+      "acceptance": [
+        "Primary happy-path scenario works end-to-end.",
+        "OpenAPI contract generated and served at /swagger or /api-docs."
+      ]
+    },
+    {
+      "id": "mvp-2",
+      "title": "Hardening & CI",
+      "acceptance": [
+        "Linting, tests in CI; SBOM generated; basic security scans pass."
+      ]
+    },
+    {
+      "id": "mvp-3",
+      "title": "Docs & Examples",
+      "acceptance": [
+        "README includes examples, troubleshooting, limitations."
+      ]
+    }
+  ],
+  "dependencies": [
+    "backend-core"
+  ],
+  "prompts": [
+    {
+      "id": "scaffold-iac",
+      "title": "Scaffold IaC Worker",
+      "prompt": "Create Spring Boot worker 'secplatform-iac' to process scan.requests with type=IAC.\n- Run Checkov and Trivy config against a specified directory\n- Parse JSON outputs into Finding objects\n- Publish results to scan.results\n- Support local path scanning without network\n- Include fixtures and parser tests",
+      "acceptance": [
+        "Runs checkov -d <path> and trivy config <path> via PowerShell on Windows.",
+        "Findings normalized with ruleId, resource, severity, remediation where present."
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "scripts/run-iac.ps1",
+      "contents": "Write-Host 'Run IaC worker'"
+    }
+  ],
+  "commands": [
+    {
+      "name": "Run (local)",
+      "run": "powershell -ExecutionPolicy Bypass -File scripts\\run-iac.ps1"
+    }
+  ]
+}

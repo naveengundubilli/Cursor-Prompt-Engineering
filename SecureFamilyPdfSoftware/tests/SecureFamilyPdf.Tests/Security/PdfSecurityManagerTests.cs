@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SecureFamilyPdf.Core.Security;
 using Xunit;
+using System.IO;
 
 namespace SecureFamilyPdf.Tests.Security;
 

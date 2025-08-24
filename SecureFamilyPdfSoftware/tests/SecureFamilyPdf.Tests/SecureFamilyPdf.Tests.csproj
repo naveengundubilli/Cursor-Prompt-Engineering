@@ -29,10 +29,7 @@
     
     <!-- Test Utilities -->
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-    
-    <!-- WPF Testing -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
   </ItemGroup>
 
   <ItemGroup>
